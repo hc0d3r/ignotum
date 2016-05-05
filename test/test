@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for i in ./bin/*;do
+	echo "------------- valgrind $i ------------"
+	"$i"
+	perl -e 'print "-"x'$(tput cols)
+done
