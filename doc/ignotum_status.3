@@ -1,0 +1,66 @@
+.TH ignotum_status 3 "07 May 2016" "Library" "libignotum man page"
+.SH NAME
+ignotum_status
+.SH SYNOPSIS
+.nf
+.B #include <unistd.h>
+
+typedef enum {
+	\fBIGNOTUM_SUCCESS,\fR
+	\fBIGNOTUM_INVALID_PID_NUMBER,\fR
+	\fBIGNOTUM_INVALID_PID_STR,\fR
+	\fBIGNOTUM_OPEN_MAP_FAILED,\fR
+	\fBIGNOTUM_OPEN_MEM_FAILED,\fR
+	\fBIGNOTUM_PID_T_OVERFLOW,\fR
+	\fBIGNOTUM_ERR_SIZE\fR
+} \fBignotum_status\fR;
+.fi
+.SH DESCRIPTION
+A status code that can be used for check if the execution of a function works without any problem or not
+.SH VALUES
+if the values equals zero (\fBIGNOTUM_SUCCESS\fR), then it works without any problems,
+if not you can use the function \fIignotum_sterror\fR for get the error description.
+
+.B IGNOTUM_SUCCESS
+.RS
+\fIignotum_strerror\fR: "success"
+.PP
+No errors
+.RE
+
+.B IGNOTUM_INVALID_PID_NUMBER
+.RS
+\fIignotum_strerror\fR: "invalid pid number"
+.PP
+You pass a invalid pid number, like a12345, abcd, -123, etc.
+.RE
+
+.B IGNOTUM_OPEN_MAP_FAILED
+.RS
+\fIignotum_strerror\fR: "failed to open map"
+.PP
+\fBopen\fR("/proc/<pid>/maps", \fBO_RDONLY\fR) failed, you can use errno to get more details about
+.RE
+
+.B IGNOTUM_OPEN_MEM_FAILED
+.RS
+\fIignotum_strerror\fR: "failed to open mem"
+.PP
+\fBopen\fR("/proc/<pid>/mem", flags) failed, you can use errno to get more details about
+.RE
+
+.B IGNOTUM_PID_T_OVERFLOW
+.RS
+\fIignotum_strerror\fR: "pid number overflow"
+.PP
+the pid number is too big, ex: 12345678971234678453158486413248
+.RE
+
+.B IGNOTUM_ERR_SIZE
+.RS
+\fIignotum_sterror\fR: "invalid error code"
+.PP
+if ignotum_status >= \fBIGNOTUM_ERR_SIZE\fR then it is a invalid status code.
+.RE
+.SH SEE ALSO
+\fBignotum_strerror\fR(3), \fBopen\fR(2)
