@@ -2,11 +2,11 @@
 .SH NAME
 ignotum_openmap, ignotum_openmapstr - open /proc/[pid]/maps
 .SH SYNOPSIS
-.nf
 .B #include <ignotum.h>
-\fBignotum_status ignotum_openmap(pid_t \fR\fIpid_number\fR, \fBint *\fR\fIfd_out\fR\fB);\fR
-\fBignotum_status ignotum_openmapstr(const char *\fR\fIpid_str\fR, \fBint *\fR\fIfd_out\fR\fB);\fR
-.fi
+.sp
+.BI "ignotum_status ignotum_openmap(pid_t " pid_number ", int *" fd_out);
+.sp
+.BI "ignotum_status ignotum_openmapstr(const char *" pid_str ", int *" fd_out);
 .SH DESCRIPTION
 open /proc/[\fIpid_number\fR]/maps on read-only mode, the file descriptor is returned on \fIfd_out\fR pointer
 .SH RETURN VALUE
