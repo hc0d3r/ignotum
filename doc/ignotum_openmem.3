@@ -4,9 +4,9 @@ ignotum_openmem, ignotum_openmemstr - open /proc/[pid]/mem
 .SH SYNOPSIS
 .B #include <ignotum.h>
 .sp
-.BI "ignotum_status ignotum_openmem(pid_t " pid_number ", int *" fd_out ", int " mode ", int " attach_pid);
+.BI "ignotum_status ignotum_openmem(pid_t " pid_number ", int *" fd_out ", int " mode ", int " attach_pid );
 .sp
-.BI "ignotum_status ignotum_openmemstr(const char *" pid_str ", int *" fd_out ", int " mode ", int " attach_pid);
+.BI "ignotum_status ignotum_openmemstr(const char *" pid_str ", int *" fd_out ", int " mode ", int " attach_pid );
 .SH DESCRIPTION
 open /proc/[\fIpid_number\fR]/mem using flags defined by \fImode\fR variable, if you want only read memory you can be use O_RDONLY,
 if you also want write on memory use O_RDWR, for more info about open flags see \fBopen\fR(2). If

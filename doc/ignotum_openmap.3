@@ -4,9 +4,9 @@ ignotum_openmap, ignotum_openmapstr - open /proc/[pid]/maps
 .SH SYNOPSIS
 .B #include <ignotum.h>
 .sp
-.BI "ignotum_status ignotum_openmap(pid_t " pid_number ", int *" fd_out);
+.BI "ignotum_status ignotum_openmap(pid_t " pid_number ", int *" fd_out );
 .sp
-.BI "ignotum_status ignotum_openmapstr(const char *" pid_str ", int *" fd_out);
+.BI "ignotum_status ignotum_openmapstr(const char *" pid_str ", int *" fd_out );
 .SH DESCRIPTION
 open /proc/[\fIpid_number\fR]/maps on read-only mode, the file descriptor is returned on \fIfd_out\fR pointer
 .SH RETURN VALUE
