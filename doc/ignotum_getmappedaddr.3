@@ -1,0 +1,137 @@
+.TH ignotum_getmappedaddr 3 "09 May 2016" "Library" "libignotum man page"
+.SH NAME
+ignotum_getmappedaddr - get mapped addrs
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.sp
+.BI "size_t ignotum_getmappedaddr(int " maps_fd ", ignotum_mapped_addr_t **" out );
+.SH DESCRIPTION
+
+read the \fImaps_fd\fR and store some informations on \fIout\fR pointer, the maps_fd should
+be a fd open using ignotum_openmap or ignotum_openmapstr, the out pointer should be deallocated using \fBfree_ignotum_mapped_addr_t\fR
+
+.nf
+ignotum_mapped_addr_t elements:
+
+typedef struct ignotum_mapped_addr {
+    ignotum_addr_range_t range;
+    int perms;
+    off_t offset;
+    dev_t st_dev;
+    ino_t st_ino;
+    ignotum_string_t pathname;
+    struct ignotum_mapped_addr *next;
+} ignotum_mapped_addr_t;
+
+.ni
+
+
+.SH RETURN VALUE
+the return value is the number of mapped regions stored on \fIout\fR pointer
+
+.SH EXAMPLE
+.nf
+#include <ignotum.h>
+
+
+char *perms_to_char(char *out, int perms){
+	int i = 0;
+
+	if(perms & 1){ // if have read perm
+		out[i++] = 'r';
+	} else {
+		out[i++] = '-';
+	}
+
+	if(perms & 2){ // if have write perm
+		out[i++] = 'w';
+	} else {
+		out[i++] = '-';
+	}
+
+	if(perms & 4){ // if have execution perm
+		out[i++] = 'x';
+	} else {
+		out[i++] = '-';
+	}
+
+	if(perms & 8){ // if map is private or shared
+		out[i++] = 'p';
+	} else {
+		out[i++] = 's';
+	}
+
+	out[i] = 0;
+
+
+	return out;
+
+
+}
+
+
+void print_mapped_addr(ignotum_mapped_addr_t *addrs){
+	char perms[5]; // +1 for null byte
+	printf("%zx-%zx %s %zx %x %d %s\n", addrs->range.start_addr, addrs->range.end_addr, \\
+			perms_to_char(perms, addrs->perms), addrs->offset, addrs->st_dev, \\
+			addrs->st_ino, addrs->pathname.ptr
+	);
+
+}
+
+int main(void){
+	int map_fd;
+	ignotum_mapped_addr_t *addrs = NULL, *i;
+
+	if( ignotum_openmapstr("self", &map_fd) == IGNOTUM_SUCCESS ){ // if no errors while open /proc/self/maps
+		if(ignotum_getmappedaddr(map_fd, &addrs)){ // if the value is big than 0
+			for(i=addrs; i!=NULL; i=i->next){
+				print_mapped_addr(i); // print the elements of list
+			}
+
+
+			free_ignotum_mapped_addr_t(&addrs); // will free the linked list, and set the pointer value to NULL, to evite wild pointers
+
+		}
+
+		close(map_fd);
+	}
+
+
+}
+
+.ni
+
+Running:
+
+.nf
+$ ./example-getmappedaddr
+400000-401000 r-xp 0 24 13895108 /tmp/a.out
+600000-601000 r--p 0 24 13895108 /tmp/a.out
+601000-602000 rw-p 1000 24 13895108 /tmp/a.out
+704000-725000 rw-p 0 0 0 [heap]
+7f320fb43000-7f320fcf6000 r-xp 0 fd01 2104056 /usr/lib64/libc-2.20.so
+7f320fcf6000-7f320fef6000 ---p 1b3000 fd01 2104056 /usr/lib64/libc-2.20.so
+7f320fef6000-7f320fefa000 r--p 1b3000 fd01 2104056 /usr/lib64/libc-2.20.so
+7f320fefa000-7f320fefc000 rw-p 1b7000 fd01 2104056 /usr/lib64/libc-2.20.so
+7f320fefc000-7f320ff00000 rw-p 0 0 0 (null)
+7f320ff00000-7f320ff02000 r-xp 0 fd01 2109684 /usr/lib64/libignotum.so
+7f320ff02000-7f3210102000 ---p 2000 fd01 2109684 /usr/lib64/libignotum.so
+7f3210102000-7f3210103000 r--p 2000 fd01 2109684 /usr/lib64/libignotum.so
+7f3210103000-7f3210104000 rw-p 3000 fd01 2109684 /usr/lib64/libignotum.so
+7f3210104000-7f3210125000 r-xp 0 fd01 2107170 /usr/lib64/ld-2.20.so
+7f32102f1000-7f32102f4000 rw-p 0 0 0 (null)
+7f3210324000-7f3210325000 rw-p 0 0 0 (null)
+7f3210325000-7f3210326000 r--p 21000 fd01 2107170 /usr/lib64/ld-2.20.so
+7f3210326000-7f3210327000 rw-p 22000 fd01 2107170 /usr/lib64/ld-2.20.so
+7f3210327000-7f3210328000 rw-p 0 0 0 (null)
+7ffe2dbcd000-7ffe2dbee000 rw-p 0 0 0 [stack]
+7ffe2dbf0000-7ffe2dbf2000 r--p 0 0 0 [vvar]
+7ffe2dbf2000-7ffe2dbf4000 r-xp 0 0 0 [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 0 0 0 [vsyscall]
+.ni
+
+
+.SH SEE ALSO
+\fBignotum_openmap\fR(3), \fBignotum_openmapstr\fR(3), \fBproc\fR(5), \fBignotum_structures\fR(3)
+
