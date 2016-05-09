@@ -65,13 +65,18 @@ typedef struct ignotum_mem_search {
 
 ### Compiling:
 
+```
 make # create ignotum.o and libignotum.so
 make install # install the lib
 make test # optional, compile the tests
+```
 
 #### Options:
+
+```
 CC - compiler (Default: gcc)
 ARCHFLAGS - architeture flags (Default: -m64)
+```
 
 ### Documentation:
 
