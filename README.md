@@ -22,3 +22,57 @@ void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **);
 void free_ignotum_mem_search(ignotum_mem_search_t *);
 
 ```
+
+### Types:
+
+```c
+typedef struct ignotum_string {
+    char *ptr;
+    size_t size;
+} ignotum_string_t;
+
+typedef struct ignotum_addr_range {
+    off_t start_addr;
+    off_t end_addr;
+} ignotum_addr_range_t;
+
+typedef struct ignotum_mapped_addr {
+    ignotum_addr_range_t range;
+    int perms;
+    off_t offset;
+    dev_t st_dev;
+    ino_t st_ino;
+    ignotum_string_t pathname;
+    struct ignotum_mapped_addr *next;
+} ignotum_mapped_addr_t;
+
+typedef struct ignotum_elements {
+    int first_hex;
+    int second_hex;
+    int perms;
+    int offset;
+    int dev;
+    int inode;
+    int pathname;
+} ignotum_elements_t;
+
+typedef struct ignotum_mem_search {
+    size_t len;
+    off_t *addrs;
+} ignotum_mem_search_t;
+
+```
+
+### Compiling:
+
+make # create ignotum.o and libignotum.so
+make install # install the lib
+make test # optional, compile the tests
+
+#### Options:
+CC - compiler (Default: gcc)
+ARCHFLAGS - architeture flags (Default: -m64)
+
+### Documentation:
+
+see the man files at doc/
