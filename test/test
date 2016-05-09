@@ -1,7 +1,8 @@
 #!/bin/bash
 
 for i in ./bin/*;do
-	echo "------------- valgrind $i ------------"
+	[[ ! -x "$i" ]] && continue;
+	echo "executing>> '$i' "
 	"$i"
 	perl -e 'print "-"x'$(tput cols)
 done
