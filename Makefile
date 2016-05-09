@@ -1,6 +1,6 @@
 CC?=gcc
 ARCHFLAGS?=-m64
-CFLAGS+=-Wall -Wextra -g -O2 $(ARCHFLAGS)
+CFLAGS+=-Wall -Wextra -O2 $(ARCHFLAGS)
 
 OBJ=./lib/ignotum.o
 SHARED_OBJ=./lib/ignotum.so
