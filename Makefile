@@ -19,7 +19,7 @@ $(OBJ): $(SRC_DIR)/ignotum.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I$(SRC_DIR)
 
 $(SHARED_OBJ): $(SRC_DIR)/ignotum.c
-	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ)
+	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ) $(CFLAGS)
 
 install: all
 	$(INSTALLPROG) $(SHARED_OBJ) /usr/lib64/libignotum.so
