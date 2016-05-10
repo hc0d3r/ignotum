@@ -1,6 +1,6 @@
 # Ignotum
 
-a simple lib to help read and write in mapped memory regions of process on linux
+a simple lib to help read and write in mapped memory regions of a linux process
 
 ### Functions:
 
