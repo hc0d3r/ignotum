@@ -6,6 +6,8 @@ OBJ=./lib/ignotum.o
 SHARED_OBJ=./lib/ignotum.so
 
 INSTALLPROG = /usr/bin/install
+INSTALL_LIB_DIR?=/usr/lib64
+INSTALL_HEADER_DIR?=/usr/include
 
 SRC_DIR = ./src
 TEST_DIR = ./test
@@ -22,11 +24,11 @@ $(SHARED_OBJ): $(SRC_DIR)/ignotum.c
 	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ) $(CFLAGS)
 
 install: all
-	$(INSTALLPROG) $(SHARED_OBJ) /usr/lib64/libignotum.so
-	$(INSTALLPROG) ./src/ignotum.h /usr/include/ignotum.h
+	$(INSTALLPROG) $(SHARED_OBJ) $(INSTALL_LIB_DIR)/libignotum.so
+	$(INSTALLPROG) ./src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
 
 uninstall:
-	-rm -f /lib/libignotum.so /usr/include/ignotum.h
+	-rm -f $(INSTALL_LIB_DIR)/libignotum.so $(INSTALL_HEADER_DIR)/ignotum.h
 
 test: all
 	$(MAKE) -C $(TEST_DIR)
