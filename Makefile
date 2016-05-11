@@ -9,6 +9,12 @@ INSTALLPROG = /usr/bin/install
 INSTALL_LIB_DIR?=/usr/lib64
 INSTALL_HEADER_DIR?=/usr/include
 
+DOC_DIR=doc
+MAN_PAGES=$(shell find $(DOC_DIR) -type f -name '*.3')
+GZIP_PAGES=$(MAN_PAGES:%=%.gz)
+MAN_PAGES_DIR=/usr/share/man
+
+
 SRC_DIR = ./src
 TEST_DIR = ./test
 
@@ -39,4 +45,16 @@ clean-test:
 clean:
 	rm -f $(OBJ) $(SHARED_OBJ)
 
-clean-all: clean clean-test
+clean-all: clean clean-test clean-doc
+
+doc: $(GZIP_PAGES)
+
+$(DOC_DIR)/%.3.gz: $(DOC_DIR)/%.3
+	gzip -c $^ > $@
+
+doc-install: doc
+	$(INSTALLPROG) -t $(MAN_PAGES_DIR)/man3/ $(GZIP_PAGES)
+
+clean-doc:
+	rm -f $(GZIP_PAGES)
+
