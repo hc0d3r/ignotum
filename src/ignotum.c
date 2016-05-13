@@ -327,7 +327,7 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 
     char pathname[PATHNAME_LEN], buf[1024];
 
-    while( (size = read(maps_fd, buf, 1)) > 0 ){
+    while( (size = read(maps_fd, buf, 1024)) > 0 ){
 		for(i=0; i<size; i++){
             if(elements.first_hex && !allocated){
                 aux = calloc(1,sizeof(ignotum_mapped_addr_t));
