@@ -248,7 +248,7 @@ int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n){
 	return read(mem_fd, out, n);
 }
 
-ssize_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr){
+size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr){
 	size_t i, ret = 0;
 	long old_data, new_data = 0L;
 
