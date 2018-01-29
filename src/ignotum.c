@@ -249,29 +249,34 @@ int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n){
 }
 
 ssize_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr){
-	size_t i;
-	long word, old;
-	int final_size;
+	size_t i, ret = 0;
+	long old_data, new_data = 0L;
 
-	for(i=0; i<len; i+=wordsize){
-		if((i+wordsize) > len){
-			final_size = len-i;
-			word = 0;
+	for(i=0; (i+wordsize)<len; i+=wordsize){
+		ptrace(PTRACE_POKEDATA, pid, addr+i, *(long *)(data+i));
+		if(errno)
+			return ret;
 
-			memcpy(&word, data+i, final_size);
-			old = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
-			old &= (unsigned long)-1 << (8*final_size);
-			word |= old;
-			ptrace(PTRACE_POKEDATA, pid, addr+i, word);
-
-		} else {
-			word = *(long *)(data+i);
-			ptrace(PTRACE_POKEDATA, pid, addr+i, word);
-		}
+		ret += wordsize;
 	}
 
-	return 0;
+	len -= i;
 
+	if(len == wordsize){
+		new_data = *(long *)(data+i);
+	} else {
+		memcpy(&new_data, data+i, len);
+		old_data = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
+		old_data &= (unsigned long)-1 << (8*len);
+		new_data |= old_data;
+	}
+
+	ptrace(PTRACE_POKEDATA, pid, addr+i, new_data);
+	if(!errno)
+		ret += len;
+
+
+	return ret;
 }
 
 

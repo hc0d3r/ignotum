@@ -32,6 +32,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 typedef struct ignotum_string {
 	char *ptr;
