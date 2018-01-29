@@ -14,7 +14,8 @@ $(TEST_BIN)/test-ignotum_openmapstr \
 $(TEST_BIN)/test-ignotum_openmemstr \
 $(TEST_BIN)/test-ignotum_getmappedaddr \
 $(TEST_BIN)/test-ignotum_memwrite \
-$(TEST_BIN)/test-ignotum_memsearch
+$(TEST_BIN)/test-ignotum_memsearch \
+$(TEST_BIN)/test-ignotum_ptrace_memwrite
 
 all: $(BIN_TEST) $(TEST_BIN)/test-ignotum_memread
 
