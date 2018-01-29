@@ -18,7 +18,7 @@ int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n);
 int ignotum_memsearch(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out);
 int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n);
 
-ssize_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr);
+size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr);
 ssize_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr);
 
 
