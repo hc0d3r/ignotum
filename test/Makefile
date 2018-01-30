@@ -9,10 +9,7 @@ SRC_DIR=../src/
 .PHONY: all clean
 
 SOURCES := $(wildcard *c)
-OBJS := $(SOURCES:%.c=%.o)
-BINS := $(addprefix $(TEST_BIN)/, $(OBJS:%.o=%))
-
-#BIN_TEST :=
+BINS := $(addprefix $(TEST_BIN)/, $(SOURCES:%.c=%))
 
 all: $(BINS)
 
