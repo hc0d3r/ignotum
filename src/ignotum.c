@@ -279,24 +279,36 @@ size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long add
 	return ret;
 }
 
-
-ssize_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr){
-	size_t i;
+size_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr){
+	size_t i, ret = 0;
 	long bytes;
 
-
-	for(i=0; i<n; i+=wordsize){
+	for(i=0; (i+wordsize)<n; i+=wordsize){
 		bytes = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
-		if((i+wordsize) > n){
-			memcpy((output+i), &bytes, n-i);
-		} else {
-			*(long *)(output+i) = bytes;
-		}
+		if(errno)
+			return ret;
+
+		*(long *)(output+i) = bytes;
+		ret += wordsize;
 	}
 
-	return 0;
+	n -= i;
 
+	bytes = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
+
+	if(!errno){
+		if(n == wordsize)
+			*(long *)(output+i) = bytes;
+		else
+			memcpy(output+i, &bytes, n);
+
+		ret += n;
+
+	}
+
+	return ret;
 }
+
 
 ignotum_status ignotum_openmem(pid_t pid_number, int *fd_out, int mode, int attach_pid){
 	int tmp_fd;
