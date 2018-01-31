@@ -3,7 +3,6 @@ ARCHFLAGS?=-m64
 CFLAGS+=-Wall -Wextra -g -O2 $(ARCHFLAGS)
 
 TEST_BIN=bin
-#IGNOTUM_LIB=../lib/ignotum.o
 LDFLAGS+=-L../lib/ -lignotum
 SRC_DIR=../src/
 
