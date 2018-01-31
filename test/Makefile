@@ -3,7 +3,8 @@ ARCHFLAGS?=-m64
 CFLAGS+=-Wall -Wextra -g -O2 $(ARCHFLAGS)
 
 TEST_BIN=bin
-IGNOTUM_LIB=../lib/ignotum.o
+#IGNOTUM_LIB=../lib/ignotum.o
+LDFLAGS+=-L../lib/ -lignotum
 SRC_DIR=../src/
 
 .PHONY: all clean
@@ -15,13 +16,13 @@ all: $(BINS)
 
 
 $(TEST_BIN)/%: %.c
-	$(CC) $(CFLAGS) -o $@ $< -I$(SRC_DIR) $(IGNOTUM_LIB)
+	$(CC) $(CFLAGS) -o $@ $< -I$(SRC_DIR)
 
 $(TEST_BIN)/test-ignotum_memread: $(TEST_BIN)/read_my_nops.o test-ignotum_memread.c
-	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(IGNOTUM_LIB)
+	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
 $(TEST_BIN)/test-ignotum_ptrace_read: $(TEST_BIN)/read_my_nops.o test-ignotum_ptrace_read.c
-	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(IGNOTUM_LIB)
+	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
 $(TEST_BIN)/read_my_nops.o:
 	nasm -f elf64 read_my_nops.asm -o bin/read_my_nops.o
