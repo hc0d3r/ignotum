@@ -14,7 +14,7 @@ all: $(BINS)
 
 
 $(TEST_BIN)/%: %.c
-	$(CC) $(CFLAGS) -o $@ $< -I$(SRC_DIR)
+	$(CC) $(CFLAGS) -o $@ $< -I$(SRC_DIR) $(LDFLAGS)
 
 $(TEST_BIN)/ignotum_memread: $(TEST_BIN)/read_my_nops.o test-ignotum_memread.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
