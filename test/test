@@ -1,5 +1,13 @@
 #!/bin/bash
 
+
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:../lib"
+
+if [[ ! -z $1 ]];then
+	"./bin/${1}"
+	exit
+fi
+
 for i in ./bin/*;do
 	[[ ! -x "$i" ]] && continue;
 	echo "executing>> '$i' "
