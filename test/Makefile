@@ -1,6 +1,5 @@
 CC?=gcc
-ARCHFLAGS?=-m64
-CFLAGS+=-Wall -Wextra -g -O2 $(ARCHFLAGS)
+CFLAGS+=-Wall -Wextra -g -O2
 
 TEST_BIN=bin
 LDFLAGS+=-L../lib/ -lignotum
