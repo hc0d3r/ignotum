@@ -54,16 +54,6 @@ typedef struct ignotum_mapped_addr {
 	struct ignotum_mapped_addr *next;
 } ignotum_mapped_addr_t;
 
-typedef struct ignotum_elements {
-	int first_hex;
-	int second_hex;
-	int perms;
-	int offset;
-	int dev;
-	int inode;
-	int pathname;
-} ignotum_elements_t;
-
 typedef struct ignotum_mem_search {
 	size_t len;
 	off_t *addrs;
