@@ -377,19 +377,8 @@ char hexchar(char x){
 	return x;
 }
 
-enum {
-	first_addr,
-	second_addr,
-	flags,
-	offset,
-	dev,
-	inode,
-	skip_space,
-	pathname
-};
-
 size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
-	int parser_flags = 0, v = 0, end = 0;
+	int parser_flags = ignotum_first_addr, v = 0, end = 0;
 	ssize_t size, i = 0, j;
 	char buff[1024];
 
@@ -405,25 +394,25 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 			char c = buff[i];
 
 			switch(parser_flags){
-				case first_addr:
+				case ignotum_first_addr:
 					if(c != '-'){
 						tmp.range.start_addr <<= 4;
 						tmp.range.start_addr += hexchar(c);
 					} else {
-						parser_flags = second_addr;
+						parser_flags = ignotum_second_addr;
 					}
 				break;
 
-				case second_addr:
+				case ignotum_second_addr:
 					if(c != ' '){
 						tmp.range.end_addr <<= 4;
 						tmp.range.end_addr += hexchar(c);
 					} else {
-						parser_flags = flags;
+						parser_flags = ignotum_flags;
 					}
 				break;
 
-				case flags:
+				case ignotum_flags:
 					if(c == '-')
 						v = 0;
 					else if(c == 'r')
@@ -437,29 +426,29 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 					else if(c == 's')
 						v = 16;
 					else if(c == ' '){
-						parser_flags = offset;
+						parser_flags = ignotum_offset;
 						break;
 					}
 
 					tmp.perms |= v;
 				break;
 
-				case offset:
+				case ignotum_offset:
 					if(c != ' '){
 						tmp.offset <<= 4;
 						tmp.offset += hexchar(c);
 					} else {
-						parser_flags = dev;
+						parser_flags = ignotum_dev;
 					}
 				break;
 
-				case dev:
+				case ignotum_dev:
 					if(c == ':'){
 						break;
 					}
 
 					else if(c == ' '){
-						parser_flags = inode;
+						parser_flags = ignotum_inode;
 					}
 
 					else {
@@ -468,16 +457,16 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 					}
 				break;
 
-				case inode:
+				case ignotum_inode:
 					if(c != ' '){
 						tmp.st_ino *= 10;
 						tmp.st_ino += c-'0';
 					} else {
-						parser_flags = skip_space;
+						parser_flags = ignotum_skip_space;
 					}
 				break;
 
-				case skip_space:
+				case ignotum_skip_space:
 					for(; i<size; i++){
 						if(buff[i] == '\n'){
 							aux = malloc(sizeof(ignotum_mapped_addr_t));
@@ -486,19 +475,19 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 							*out = aux;
 							out = &(aux->next);
 
-							parser_flags = first_addr;
+							parser_flags = ignotum_first_addr;
 							memset(&tmp, 0, sizeof(ignotum_mapped_addr_t));
 							ret++;
 							break;
 						} else if(buff[i] != ' '){
 							i--;
-							parser_flags = pathname;
+							parser_flags = ignotum_pathname;
 							break;
 						}
 					}
 				break;
 
-				case pathname:
+				case ignotum_pathname:
 					for(j=i; i<size; i++){
 						if(buff[i] == '\n'){
 							end = 1;
@@ -515,7 +504,7 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 						*out = aux;
 						out = &(aux->next);
 
-						parser_flags = first_addr;
+						parser_flags = ignotum_first_addr;
 						memset(&tmp, 0, sizeof(tmp));
 						end = 0;
 						ret++;

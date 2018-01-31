@@ -59,6 +59,16 @@ typedef struct ignotum_mem_search {
 	off_t *addrs;
 } ignotum_mem_search_t;
 
+typedef enum {
+	ignotum_first_addr,
+	ignotum_second_addr,
+	ignotum_flags,
+	ignotum_offset,
+	ignotum_dev,
+	ignotum_inode,
+	ignotum_skip_space,
+	ignotum_pathname
+} ignotum_maps_parser;
 
 typedef enum {
 	IGNOTUM_SUCCESS,
