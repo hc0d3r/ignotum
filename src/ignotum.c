@@ -377,169 +377,156 @@ char hexchar(char x){
 	return x;
 }
 
+enum {
+	first_addr,
+	second_addr,
+	flags,
+	offset,
+	dev,
+	inode,
+	skip_space,
+	pathname
+};
 
 size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
-	int size, i, allocated = 0, start_path = 0;
-	int j = 0;
+	int parser_flags = 0, v = 0, end = 0;
+	ssize_t size, i = 0, j;
+	char buff[1024];
 
 	size_t ret = 0;
 
-	ignotum_mapped_addr_t **tmp = out, *aux = NULL;
-	ignotum_elements_t elements = DEFAULT_IGNOTUM_ELEMENTS;
 
-	char pathname[PATHNAME_LEN], buf[1024];
+	ignotum_mapped_addr_t tmp, *aux;
+	memset(&tmp, 0, sizeof(tmp));
 
-	while( (size = read(maps_fd, buf, 1024)) > 0 ){
+
+	while( (size = read(maps_fd, buff, sizeof(buff))) > 0 ){
 		for(i=0; i<size; i++){
-			if(elements.first_hex && !allocated){
-				aux = calloc(1,sizeof(ignotum_mapped_addr_t));
-				allocated = 1;
-			}
+			char c = buff[i];
 
-
-			if(elements.first_hex){
-				if(buf[i] == '-'){
-					elements.second_hex = 1;
-					elements.first_hex = 0;
-				}
-
-				else if(check_hex_digit(buf[i])){
-					aux->range.start_addr = (aux->range.start_addr << 4) | hexchar(buf[i]);
-				} else {
-					goto ignotum_getmappedaddr_err;
-				}
-
-				continue;
-
-			}
-
-			if(elements.second_hex){
-				if(check_hex_digit(buf[i])){
-					aux->range.end_addr = (aux->range.end_addr << 4) | hexchar(buf[i]);
-				}
-
-				else if(buf[i] == ' '){
-					elements.second_hex = 0;
-					elements.perms = 1;
-				}
-
-				 else {
-					goto ignotum_getmappedaddr_err;
-				}
-
-				continue;
-			}
-
-			if(elements.perms){
-				if(buf[i] == ' '){
-					elements.perms = 0;
-					elements.offset = 1;
-				} else if(buf[i] == 'r'){
-					aux->perms |= 1;
-				} else if(buf[i] == 'w'){
-					aux->perms |= 2;
-				} else if(buf[i] == 'x'){
-					aux->perms |= 4;
-				} else if(buf[i] == 'p'){
-					aux->perms |= 8;
-				} else if(buf[i] == 's'){
-					aux->perms |= 16;
-				} else if(buf[i] == '-'){
-					continue;
-				} else {
-					goto ignotum_getmappedaddr_err;
-				}
-
-				continue;
-			}
-
-			if(elements.offset){
-				if(buf[i] == ' '){
-					elements.offset = 0;
-					elements.dev = 1;
-				} else if(check_hex_digit(buf[i])){
-					aux->offset = (aux->offset << 4) | hexchar(buf[i]);
-				} else {
-					goto ignotum_getmappedaddr_err;
-				}
-
-				continue;
-			}
-
-			if(elements.dev){
-				if(check_hex_digit(buf[i])){
-					aux->st_dev = (aux->st_dev << 4) | hexchar(buf[i]);
-				} else if(buf[i] == ':'){
-					continue;
-				} else if(buf[i] == ' '){
-					elements.dev = 0;
-					elements.inode = 1;
-				}
-
-				continue;
-			}
-
-			if(elements.inode){
-				if(buf[i] == ' '){
-					elements.inode = 0;
-					elements.pathname = 1;
-				} else if(buf[i] < '0' || buf[i] > '9'){
-					goto ignotum_getmappedaddr_err;
-				} else {
-					aux->st_ino = 10*aux->st_ino + (buf[i]-'0');
-				}
-
-				continue;
-			}
-
-			if(elements.pathname){
-				for(; i<size; i++){
-					if(buf[i] == ' ' && !start_path){
-						continue;
+			switch(parser_flags){
+				case first_addr:
+					if(c != '-'){
+						tmp.range.start_addr <<= 4;
+						tmp.range.start_addr += hexchar(c);
+					} else {
+						parser_flags = second_addr;
 					}
+				break;
 
-					if(buf[i] == '\n'){
-						elements.pathname = 0;
-						elements.first_hex = 1;
-						allocated = 0;
-						if(j){
-							ignotum_string_t_copy(&aux->pathname, pathname, j);
-							j = 0;
-						}
+				case second_addr:
+					if(c != ' '){
+						tmp.range.end_addr <<= 4;
+						tmp.range.end_addr += hexchar(c);
+					} else {
+						parser_flags = flags;
+					}
+				break;
 
-						*tmp = aux;
-						tmp = &(aux->next);
-
-						start_path = 0;
-						i++;
-						ret++;
-
+				case flags:
+					if(c == '-')
+						v = 0;
+					else if(c == 'r')
+						v = 1;
+					else if(c == 'x')
+						v = 2;
+					else if(c == 'w')
+						v = 4;
+					else if(c == 'p')
+						v = 8;
+					else if(c == 's')
+						v = 16;
+					else if(c == ' '){
+						parser_flags = offset;
 						break;
 					}
 
+					tmp.perms |= v;
+				break;
+
+				case offset:
+					if(c != ' '){
+						tmp.offset <<= 4;
+						tmp.offset += hexchar(c);
+					} else {
+						parser_flags = dev;
+					}
+				break;
+
+				case dev:
+					if(c == ':'){
+						break;
+					}
+
+					else if(c == ' '){
+						parser_flags = inode;
+					}
+
 					else {
-						start_path = 1;
-						pathname[j] = buf[i];
-						j++;
-						if(j == PATHNAME_LEN){
-							ignotum_string_t_copy(&aux->pathname, pathname, PATHNAME_LEN);
-							j = 0;
+						tmp.st_dev <<= 4;
+						tmp.st_dev += hexchar(c);
+					}
+				break;
+
+				case inode:
+					if(c != ' '){
+						tmp.st_ino *= 10;
+						tmp.st_ino += c-'0';
+					} else {
+						parser_flags = skip_space;
+					}
+				break;
+
+				case skip_space:
+					for(; i<size; i++){
+						if(buff[i] == '\n'){
+							aux = malloc(sizeof(ignotum_mapped_addr_t));
+							memcpy(aux, &tmp, sizeof(ignotum_mapped_addr_t));
+
+							*out = aux;
+							out = &(aux->next);
+
+							parser_flags = first_addr;
+							memset(&tmp, 0, sizeof(ignotum_mapped_addr_t));
+							ret++;
+							break;
+						} else if(buff[i] != ' '){
+							i--;
+							parser_flags = pathname;
+							break;
+						}
+					}
+				break;
+
+				case pathname:
+					for(j=i; i<size; i++){
+						if(buff[i] == '\n'){
+							end = 1;
+							break;
 						}
 					}
 
-				}
+					ignotum_string_t_copy(&tmp.pathname, &(buff[j]), i-j);
+
+					if(end){
+						aux = malloc(sizeof(ignotum_mapped_addr_t));
+						memcpy(aux, &tmp, sizeof(ignotum_mapped_addr_t));
+
+						*out = aux;
+						out = &(aux->next);
+
+						parser_flags = first_addr;
+						memset(&tmp, 0, sizeof(tmp));
+						end = 0;
+						ret++;
+					}
+
+				break;
 			}
-
 		}
-
 	}
 
 	return ret;
-
-	ignotum_getmappedaddr_err:
-		ignotum_free(aux);
-		return ret;
-
 }
 
 void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **addr){
