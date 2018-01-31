@@ -3,9 +3,10 @@ ARCHFLAGS?=-m64
 CFLAGS+=-Wall -Wextra -O2 $(ARCHFLAGS)
 
 OBJ=./lib/ignotum.o
-SHARED_OBJ=./lib/ignotum.so
+SHARED_OBJ=./lib/libignotum.so
+STATIC_OBJ=./lib/libignotum.a
 
-INSTALLPROG = /usr/bin/install
+INSTALLPROG=/usr/bin/install
 INSTALL_LIB_DIR?=/usr/lib64
 INSTALL_HEADER_DIR?=/usr/include
 
@@ -21,12 +22,15 @@ TEST_DIR = ./test
 
 .PHONY: all install uninstall test
 
-all: $(OBJ) $(SHARED_OBJ)
+all: $(SHARED_OBJ) $(STATIC_OBJ)
 
 $(OBJ): $(SRC_DIR)/ignotum.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I$(SRC_DIR)
 
-$(SHARED_OBJ): $(SRC_DIR)/ignotum.c
+$(STATIC_OBJ): $(OBJ)
+	ar -cvq $(STATIC_OBJ) $(OBJ)
+
+$(SHARED_OBJ): $(OBJ)
 	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ) $(CFLAGS)
 
 install: all
@@ -43,7 +47,7 @@ clean-test:
 	$(MAKE) -C $(TEST_DIR) clean
 
 clean:
-	rm -f $(OBJ) $(SHARED_OBJ)
+	rm -f $(OBJ) $(SHARED_OBJ) $(STATIC_OBJ)
 
 clean-all: clean clean-test clean-doc
 
@@ -57,4 +61,3 @@ doc-install: doc
 
 clean-doc:
 	rm -f $(GZIP_PAGES)
-
