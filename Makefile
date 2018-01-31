@@ -1,6 +1,5 @@
 CC?=gcc
-ARCHFLAGS?=-m64
-CFLAGS+=-Wall -Wextra -O2 $(ARCHFLAGS)
+CFLAGS+=-Wall -Wextra -O2
 
 OBJ=./lib/ignotum.o
 SHARED_OBJ=./lib/libignotum.so
@@ -28,7 +27,7 @@ $(OBJ): $(SRC_DIR)/ignotum.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I$(SRC_DIR)
 
 $(STATIC_OBJ): $(OBJ)
-	ar -cvq $(STATIC_OBJ) $(OBJ)
+	ar -cvr $(STATIC_OBJ) $(OBJ)
 
 $(SHARED_OBJ): $(OBJ)
 	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ) $(CFLAGS)
