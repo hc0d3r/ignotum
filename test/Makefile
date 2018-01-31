@@ -18,10 +18,10 @@ all: $(BINS)
 $(TEST_BIN)/%: %.c
 	$(CC) $(CFLAGS) -o $@ $< -I$(SRC_DIR)
 
-$(TEST_BIN)/test-ignotum_memread: $(TEST_BIN)/read_my_nops.o test-ignotum_memread.c
+$(TEST_BIN)/ignotum_memread: $(TEST_BIN)/read_my_nops.o test-ignotum_memread.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
-$(TEST_BIN)/test-ignotum_ptrace_read: $(TEST_BIN)/read_my_nops.o test-ignotum_ptrace_read.c
+$(TEST_BIN)/ignotum_ptrace_read: $(TEST_BIN)/read_my_nops.o test-ignotum_ptrace_read.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
 $(TEST_BIN)/read_my_nops.o:
