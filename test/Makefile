@@ -19,7 +19,7 @@ $(TEST_BIN)/%: %.c
 $(TEST_BIN)/ignotum_memread: $(TEST_BIN)/read_my_nops.o ignotum_memread.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
-$(TEST_BIN)/ignotum_ptrace_read: $(TEST_BIN)/read_my_nops.o ignotum_ptrace_read.c
+$(TEST_BIN)/ignotum_ptrace_memread: $(TEST_BIN)/read_my_nops.o ignotum_ptrace_memread.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(SRC_DIR) $(LDFLAGS)
 
 $(TEST_BIN)/read_my_nops.o:
