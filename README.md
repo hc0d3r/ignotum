@@ -69,7 +69,6 @@ make test # optional, compile the tests
 
 ```
 CC - compiler (Default: gcc)
-ARCHFLAGS - architeture flags (Default: -m64)
 INSTALL_LIB_DIR - dir to install .so file (Default: /usr/lib64)
 INSTALL_HEADER_DIR - dir to install .h file (Default: /usr/include)
 ```
