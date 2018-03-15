@@ -8,7 +8,6 @@
 #define DEFAULT_IGNOTUM_ADDR_RANGE (struct ignotum_addr_range){ 0, 0 }
 #define DEFAULT_IGNOTUM_STRING (struct ignotum_string){ NULL, 0 }
 #define DEFAULT_IGNOTUM_ADDR_LIST (struct ignotum_addr_list){ DEFAULT_IGNOTUM_ADDR_RANGE, 0, 0, 0, 0, DEFAULT_IGNOTUM_STRING, NULL }
-#define DEFAULT_IGNOTUM_ELEMENTS (struct ignotum_elements){ 1, 0, 0, 0, 0, 0, 0 }
 #define DEFAULT_IGNOTUM_MEMSEARCH (struct ignotum_mem_search){ 0, NULL }
 
 /* size constant */
