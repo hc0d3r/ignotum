@@ -365,14 +365,18 @@ ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, in
 }
 
 char hexchar(const char x){
+	char ret = 0;
+
 	if( x >= '0' && x <= '9' )
-		return x-'0';
+		ret = x-'0';
 
-	if( x >= 'a' && x <= 'f' )
-		return x-'a'+10;
+	else if( x >= 'a' && x <= 'f' )
+		ret = x-'a'+10;
 
-	if( x >= 'A' && x <= 'F' )
-		return x-'A'+10;
+	else if( x >= 'A' && x <= 'F' )
+		ret = x-'A'+10;
+
+	return ret;
 }
 
 size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
