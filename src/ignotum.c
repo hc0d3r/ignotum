@@ -279,7 +279,7 @@ size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long add
 	return ret;
 }
 
-size_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr){
+size_t ignotum_ptrace_memread(pid_t pid, void *output, size_t n, long addr){
 	size_t i, ret = 0;
 	long bytes;
 

@@ -25,7 +25,7 @@ int main(void){
 	}
 
 	waitpid(pid, NULL, 0);
-	size_t ret = ignotum_ptrace_read(pid, nops, 10, (long)read_my_nops);
+	size_t ret = ignotum_ptrace_memread(pid, nops, 10, (long)read_my_nops);
 	ptrace(PTRACE_CONT, pid, 0L, 0L);
 	waitpid(pid, NULL, 0);
 
