@@ -69,6 +69,14 @@ typedef enum {
 	ignotum_pathname
 } ignotum_maps_parser;
 
+enum {
+	ignotum_read = 1,
+	ignotum_exec = 2,
+	ignotum_write = 4,
+	ignotum_private = 8,
+	ignotum_shared = 16
+};
+
 typedef enum {
 	IGNOTUM_SUCCESS,
 	IGNOTUM_INVALID_PID_NUMBER,

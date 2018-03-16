@@ -385,15 +385,15 @@ ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out){
 					if(c == '-')
 						v = 0;
 					else if(c == 'r')
-						v = 1;
+						v = ignotum_read;
 					else if(c == 'x')
-						v = 2;
+						v = ignotum_exec;
 					else if(c == 'w')
-						v = 4;
+						v = ignotum_write;
 					else if(c == 'p')
-						v = 8;
+						v = ignotum_private;
 					else if(c == 's')
-						v = 16;
+						v = ignotum_shared;
 					else if(c == ' '){
 						parser_flags = ignotum_offset;
 						break;
