@@ -132,27 +132,6 @@ static char *genpath(char *proc_path, const char *pid_str, const char *filename)
 	return proc_path;
 }
 
-ignotum_status ignotum_openmap(pid_t pid_number, int *fd_out){
-	int tmp_fd;
-	char *pid_str;
-	char proc_path[6 + MAX10_PID_T_STR + 5] = "/proc/";
-
-	if(pid_number < 0){
-		return IGNOTUM_INVALID_PID_NUMBER;
-	}
-
-	pid_str = ignotum_pid2str(pid_number);
-	tmp_fd = open(genpath(proc_path, pid_str, memory_files[0]), O_RDONLY);
-
-	if( tmp_fd == -1){
-		return IGNOTUM_OPEN_MAP_FAILED;
-	} else {
-		*fd_out = tmp_fd;
-	}
-
-	return IGNOTUM_SUCCESS;
-}
-
 static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, size_t src_size){
 	if(!string->size){
 		string->ptr = malloc( sizeof(char) * (src_size+1) );
@@ -217,25 +196,6 @@ int checkpidstring(const char *str){
 	}
 
 	return 1;
-}
-
-ignotum_status ignotum_openmapstr(const char *pid_str, int *fd_out){
-	char proc_path[6 + MAX10_PID_T_STR + 5] = "/proc/";
-	int tmp_fd;
-
-	if( checkpidstring(pid_str) ){
-		tmp_fd = open(genpath(proc_path, pid_str, memory_files[0]), O_RDONLY);
-
-		if(tmp_fd == -1){
-			return IGNOTUM_OPEN_MAP_FAILED;
-		} else {
-			*fd_out = tmp_fd;
-		}
-	} else {
-		return IGNOTUM_INVALID_PID_STR;
-	}
-
-	return IGNOTUM_SUCCESS;
 }
 
 int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n){
