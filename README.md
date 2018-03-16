@@ -5,8 +5,6 @@ a simple lib to help read and write in mapped memory regions of a linux process
 ### Functions:
 
 ```c
-ignotum_status ignotum_openmap(pid_t pid_number, int *fd_out);
-ignotum_status ignotum_openmapstr(const char *pid_str, int *fd_out);
 ignotum_status ignotum_openmem(pid_t pid_number, int *fd_out, int mode, int attach_pid);
 ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, int attach_pid);
 
