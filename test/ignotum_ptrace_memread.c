@@ -31,12 +31,12 @@ int main(void){
 
 	printf("bytes read: %zu\n", ret);
 	for(i=0; i<10; i++){
-	    printf("%x ", nops[i]);
+		printf("%x ", nops[i]);
 	}
 
 	putchar('\n');
 
 
-    return 0;
+	return 0;
 
 }

@@ -32,6 +32,6 @@ int main(void){
 
 	printf("bytes written: %zu\n", ret);
 
-    return 0;
+	return 0;
 
 }

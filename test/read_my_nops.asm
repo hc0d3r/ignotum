@@ -11,4 +11,4 @@ read_my_nops:
 	nop
 	nop
 	nop
-    ret
+	ret
