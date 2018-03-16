@@ -379,17 +379,24 @@ char hexchar(const char x){
 	return ret;
 }
 
-size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
-	int parser_flags = ignotum_first_addr, v = 0, end = 0;
+ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out){
+	int parser_flags = ignotum_first_addr, v = 0, end = 0, maps_fd;
 	ssize_t size, i = 0, j;
 	char buff[1024];
 
-	size_t ret = 0;
+	ssize_t ret = -1;
 
+	if(target_pid)
+		snprintf(buff, sizeof(buff), "/proc/%d/maps", target_pid);
+	else
+		memcpy(buff, "/proc/self/maps", 16);
+
+	if((maps_fd = open(buff, O_RDONLY)) == -1){
+		goto end;
+	}
 
 	ignotum_mapped_addr_t tmp, *aux;
 	memset(&tmp, 0, sizeof(tmp));
-
 
 	while( (size = read(maps_fd, buff, sizeof(buff))) > 0 ){
 		for(i=0; i<size; i++){
@@ -517,7 +524,10 @@ size_t ignotum_getmappedaddr(int maps_fd, ignotum_mapped_addr_t **out){
 		}
 	}
 
-	return ret;
+	close(maps_fd);
+
+	end:
+		return ret;
 }
 
 void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **addr){
