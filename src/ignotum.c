@@ -184,20 +184,6 @@ static ignotum_status str2pid_t(const char *pid_str, pid_t *out){
 
 }
 
-int checkpidstring(const char *str){
-
-	if(!strcmp("self", str)){
-		return 1;
-	}
-
-	for(; *str; str++){
-		if(*str < '0' || *str > '9')
-			return 0;
-	}
-
-	return 1;
-}
-
 int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n){
 	lseek(mem_fd, offset, SEEK_SET);
 	return write(mem_fd, src, n);
