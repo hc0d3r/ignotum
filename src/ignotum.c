@@ -5,8 +5,6 @@
 
 #include <ignotum.h>
 
-static const char *memory_files[] = {"maps", "mem"};
-
 /* check if pointer is null, if not free and set it to null, to evite
  * wild pointers
  */
@@ -43,29 +41,6 @@ void strrev(char *dest, const char *src, size_t size){
 	}
 
 	dest[i] = 0;
-}
-
-static char *ignotum_pid2str(pid_t pid_number){
-	static char str_pid[MAX10_PID_T_STR];
-	char s_aux[MAX10_PID_T_STR];
-	size_t i = 0;
-
-	if(pid_number == 0){
-		str_pid[0] = '0';
-		str_pid[1] = 0x0;
-		return str_pid;
-	}
-
-	while(pid_number && i != MAX10_PID_T_STR){ /* size verification, to avoid potential overflow bugs */
-		s_aux[i++] = pid_number%10 + '0';
-		pid_number /= 10;
-	}
-
-	s_aux[i] = 0;
-
-	strrev(str_pid, s_aux, i);
-
-	return str_pid;
 }
 
 static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
@@ -116,22 +91,6 @@ int ignotum_memsearch(const void *search, size_t search_size, int mem_fd, ignotu
 
 }
 
-static char *genpath(char *proc_path, const char *pid_str, const char *filename){
-	size_t i;
-
-	for(i=6; *pid_str; i++, pid_str++)
-		proc_path[i] = *pid_str;
-
-	proc_path[i++] = '/';
-
-	for(; *filename; filename++, i++)
-		proc_path[i] = *filename;
-
-	proc_path[i] = 0x0;
-
-	return proc_path;
-}
-
 static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, size_t src_size){
 	if(!string->size){
 		string->ptr = malloc( sizeof(char) * (src_size+1) );
@@ -146,43 +105,6 @@ static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, siz
 	}
 }
 
-
-static ignotum_status str2pid_t(const char *pid_str, pid_t *out){
-	pid_t tmp = 0;
-	char aux;
-
-	if(!strcmp("self", pid_str)){
-		*out = getpid();
-		return IGNOTUM_SUCCESS;
-	}
-
-	while(*pid_str){
-		aux = *pid_str;
-
-		if(aux < '0' || aux > '9')
-			return IGNOTUM_INVALID_PID_NUMBER;
-		aux -= '0';
-
-		if(tmp > SIGNED_OVERFLOW_PID_T/10){
-			return IGNOTUM_PID_T_OVERFLOW;
-		} else {
-			tmp *= 10;
-		}
-
-		if(tmp > SIGNED_OVERFLOW_PID_T - aux){
-			return IGNOTUM_PID_T_OVERFLOW;
-		} else {
-			tmp += aux;
-		}
-
-		pid_str++;
-	}
-
-	*out = tmp;
-
-	return IGNOTUM_SUCCESS;
-
-}
 
 int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n){
 	lseek(mem_fd, offset, SEEK_SET);

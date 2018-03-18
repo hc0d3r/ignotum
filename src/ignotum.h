@@ -88,7 +88,6 @@ typedef enum {
 } ignotum_status;
 
 int ignotum_openmem(pid_t pid_number, int mode);
-ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, int attach_pid);
 
 const char *ignotum_strerror(ignotum_status code);
 
