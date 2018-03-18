@@ -267,34 +267,6 @@ int ignotum_openmem(pid_t pid_number, int mode){
 	return open(filename, mode);
 }
 
-ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, int attach_pid){
-	int tmp_fd;
-	pid_t pid_number = 0;
-	char proc_path[6 + MAX10_PID_T_STR + 5] = "/proc/";
-	ignotum_status status;
-
-	status = str2pid_t(pid_str, &pid_number);
-	if( status == IGNOTUM_SUCCESS ){
-
-		if(attach_pid){
-			ptrace(PTRACE_ATTACH, pid_number, NULL, NULL);
-			waitpid(pid_number, NULL, 0);
-		}
-
-		tmp_fd = open(genpath(proc_path, pid_str, memory_files[1]), mode);
-
-		if(tmp_fd == -1){
-			return IGNOTUM_OPEN_MEM_FAILED;
-		} else {
-			*fd_out = tmp_fd;
-		}
-	} else {
-		return status;
-	}
-
-	return IGNOTUM_SUCCESS;
-}
-
 char hexchar(const char x){
 	char ret = 0;
 
