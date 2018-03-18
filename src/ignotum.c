@@ -153,7 +153,7 @@ size_t ignotum_ptrace_memread(pid_t pid, void *output, size_t n, long addr){
 int ignotum_openmem(pid_t pid_number, int mode){
 	char filename[6 + MAX10_PID_T_STR + 5];
 	if(pid_number == 0){
-		snprintf(filename, sizeof(filename), "/proc/self/mem");
+		memcpy(filename, "/proc/self/mem", 15);
 	} else {
 		snprintf(filename, sizeof(filename), "/proc/%d/mem", pid_number);
 	}
