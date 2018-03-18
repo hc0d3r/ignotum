@@ -15,18 +15,6 @@ static void __safefree(void **pp){
 	}
 }
 
-const char *ignotum_strerror(ignotum_status code){
-	static const char *str_err[]={
-		"success",
-		"invalid pid number",
-		"failed to open map",
-		"failed to open mem",
-		"pid number overflow",
-	};
-
-	return (code < IGNOTUM_ERR_SIZE) ? str_err[code] : "invalid error code";
-}
-
 void strrev(char *dest, const char *src, size_t size){
 	size_t i = 0;
 
