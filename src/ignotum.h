@@ -77,19 +77,7 @@ enum {
 	ignotum_shared = 16
 };
 
-typedef enum {
-	IGNOTUM_SUCCESS,
-	IGNOTUM_INVALID_PID_NUMBER,
-	IGNOTUM_INVALID_PID_STR,
-	IGNOTUM_OPEN_MAP_FAILED,
-	IGNOTUM_OPEN_MEM_FAILED,
-	IGNOTUM_PID_T_OVERFLOW,
-	IGNOTUM_ERR_SIZE
-} ignotum_status;
-
 int ignotum_openmem(pid_t pid_number, int mode);
-
-const char *ignotum_strerror(ignotum_status code);
 
 ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out);
 

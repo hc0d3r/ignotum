@@ -15,22 +15,6 @@ static void __safefree(void **pp){
 	}
 }
 
-void strrev(char *dest, const char *src, size_t size){
-	size_t i = 0;
-
-	if(!size)   /* check if size is zero, to avoid size turn (size_t)-1 and stack overflow */
-		return;
-
-	size--;
-
-	while(i <= size){
-		dest[i] = src[size-i];
-		i++;
-	}
-
-	dest[i] = 0;
-}
-
 static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
 	if(!out->len){
 		out->addrs = malloc(sizeof(off_t));
