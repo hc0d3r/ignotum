@@ -18,7 +18,7 @@ int main(void){
 				continue;
 
 			if(!strcmp("[stack]", i->pathname.ptr)){
-				ignotum_openmem(getpid(), &mem_fd, O_RDONLY, 0);
+				mem_fd = ignotum_openmem(getpid(), O_RDONLY);
 				ignotum_memsearch("leet", 4, mem_fd , i->range, &result);
 
 				if(result.len){

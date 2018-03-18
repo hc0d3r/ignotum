@@ -87,7 +87,7 @@ typedef enum {
 	IGNOTUM_ERR_SIZE
 } ignotum_status;
 
-ignotum_status ignotum_openmem(pid_t pid_number, int *fd_out, int mode, int attach_pid);
+int ignotum_openmem(pid_t pid_number, int mode);
 ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, int attach_pid);
 
 const char *ignotum_strerror(ignotum_status code);

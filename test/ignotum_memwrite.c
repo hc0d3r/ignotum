@@ -6,7 +6,7 @@ int main(void){
 
 	printf("(%p) before -> %s\n", change_me, change_me);
 
-	ignotum_openmem( getpid(), &mem_fd, O_RDWR, 0 );
+	mem_fd = ignotum_openmem( getpid(), O_RDWR );
 	ignotum_memwrite(mem_fd, (off_t)change_me, "Yes, i can\0", 11);
 
 	printf("(%p) after  -> %s\n", change_me, change_me);

@@ -256,30 +256,10 @@ size_t ignotum_ptrace_memread(pid_t pid, void *output, size_t n, long addr){
 }
 
 
-ignotum_status ignotum_openmem(pid_t pid_number, int *fd_out, int mode, int attach_pid){
-	int tmp_fd;
-	char *pid_str;
-	char proc_path[6 + MAX10_PID_T_STR + 5] = "/proc/";
-
-	if(pid_number < 0){
-		return IGNOTUM_INVALID_PID_NUMBER;
-	}
-
-	if(attach_pid){
-		ptrace(PTRACE_ATTACH, pid_number, NULL, NULL);
-		waitpid(pid_number, NULL, 0);
-	}
-
-	pid_str = ignotum_pid2str(pid_number);
-	tmp_fd = open(genpath(proc_path, pid_str, memory_files[1]), mode);
-
-	if( tmp_fd == -1){
-		return IGNOTUM_OPEN_MEM_FAILED;
-	} else {
-		*fd_out = tmp_fd;
-	}
-
-	return IGNOTUM_SUCCESS;
+int ignotum_openmem(pid_t pid_number, int mode){
+	char filename[6 + MAX10_PID_T_STR + 5];
+	snprintf(filename, sizeof(filename), "/proc/%d/mem", pid_number);
+	return open(filename, mode);
 }
 
 ignotum_status ignotum_openmemstr(const char *pid_str, int *fd_out, int mode, int attach_pid){

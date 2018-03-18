@@ -11,7 +11,7 @@ int main(void){
 	int mem_fd, i;
 	unsigned char nops[10];
 
-	ignotum_openmem(getpid(), &mem_fd, O_RDWR, 0);
+	mem_fd = ignotum_openmem(getpid(), O_RDWR);
 	ignotum_memread(mem_fd, (off_t)read_my_nops, nops, 10);
 
 	for(i=0; i<10; i++){
