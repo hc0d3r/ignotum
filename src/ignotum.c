@@ -88,7 +88,7 @@ int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n){
 	return read(mem_fd, out, n);
 }
 
-size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long addr){
+size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, long addr, size_t len){
 	size_t i, ret = 0;
 	long old_data, new_data = 0L;
 
@@ -119,7 +119,7 @@ size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, size_t len, long add
 	return ret;
 }
 
-size_t ignotum_ptrace_memread(pid_t pid, void *output, size_t n, long addr){
+size_t ignotum_ptrace_memread(pid_t pid, void *output, long addr, size_t n){
 	size_t i, ret = 0;
 	long bytes;
 
