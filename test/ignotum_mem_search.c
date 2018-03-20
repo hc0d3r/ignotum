@@ -7,7 +7,7 @@ int main(void){
 	char test[]="abcdefghijklmnopq ------ leet --------";
 	(void)test;
 
-	ignotum_mapped_addr_t *addrs = NULL, *i = NULL;
+	ignotum_map_list_t *addrs = NULL, *i = NULL;
 	ignotum_mem_search_t result = DEFAULT_IGNOTUM_MEMSEARCH;
 
 	printf("char test[] = %p\n", test);

@@ -3,7 +3,7 @@
 
 
 int main(void){
-	ignotum_mapped_addr_t *addrs = NULL, *i = NULL;
+	ignotum_map_list_t *addrs = NULL, *i = NULL;
 
 	mmap((void *)0x13370000, 4096, PROT_READ|PROT_WRITE, MAP_FIXED|MAP_ANONYMOUS|MAP_PRIVATE, -1, 0L);
 

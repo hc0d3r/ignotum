@@ -174,7 +174,7 @@ char hexchar(const char x){
 	return ret;
 }
 
-ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
+ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 	int parser_flags = ignotum_first_addr, v = 0, end = 0, maps_fd;
 	ssize_t size, i = 0, j;
 	char buff[1024];
@@ -190,7 +190,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
 		goto end;
 	}
 
-	ignotum_mapped_addr_t tmp, *aux;
+	ignotum_map_list_t tmp, *aux;
 	memset(&tmp, 0, sizeof(tmp));
 
 	while( (size = read(maps_fd, buff, sizeof(buff))) > 0 ){
@@ -273,14 +273,14 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
 				case ignotum_skip_space:
 					for(; i<size; i++){
 						if(buff[i] == '\n'){
-							aux = malloc(sizeof(ignotum_mapped_addr_t));
-							memcpy(aux, &tmp, sizeof(ignotum_mapped_addr_t));
+							aux = malloc(sizeof(ignotum_map_list_t));
+							memcpy(aux, &tmp, sizeof(ignotum_map_list_t));
 
 							*out = aux;
 							out = &(aux->next);
 
 							parser_flags = ignotum_first_addr;
-							memset(&tmp, 0, sizeof(ignotum_mapped_addr_t));
+							memset(&tmp, 0, sizeof(ignotum_map_list_t));
 							ret++;
 							break;
 						} else if(buff[i] != ' '){
@@ -302,8 +302,8 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
 					ignotum_string_t_copy(&tmp.pathname, &(buff[j]), i-j);
 
 					if(end){
-						aux = malloc(sizeof(ignotum_mapped_addr_t));
-						memcpy(aux, &tmp, sizeof(ignotum_mapped_addr_t));
+						aux = malloc(sizeof(ignotum_map_list_t));
+						memcpy(aux, &tmp, sizeof(ignotum_map_list_t));
 
 						*out = aux;
 						out = &(aux->next);
@@ -325,8 +325,8 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
 		return ret;
 }
 
-void free_ignotum_mapped_addr(ignotum_mapped_addr_t **addr){
-	ignotum_mapped_addr_t *aux;
+void free_ignotum_map_list(ignotum_map_list_t **addr){
+	ignotum_map_list_t *aux;
 
 	while(*addr){
 		aux = (*addr)->next;
