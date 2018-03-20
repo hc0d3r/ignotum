@@ -88,7 +88,7 @@ int ignotum_mem_read(int mem_fd, off_t offset, void *out, size_t n);
 size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len);
 size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
-void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **);
+void free_ignotum_mapped_addr(ignotum_mapped_addr_t **);
 void free_ignotum_mem_search(ignotum_mem_search_t *);
 
 

@@ -17,7 +17,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, size_t len, long addr);
 size_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr);
 
 
-void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **);
+void free_ignotum_mapped_addr(ignotum_mapped_addr_t **);
 void free_ignotum_mem_search(ignotum_mem_search_t *);
 
 ```

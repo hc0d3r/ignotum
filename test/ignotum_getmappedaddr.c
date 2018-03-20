@@ -14,7 +14,7 @@ int main(void){
 		}
 	}
 
-	free_ignotum_mapped_addr_t(&addrs);
+	free_ignotum_mapped_addr(&addrs);
 
 	return 0;
 

@@ -33,7 +33,7 @@ int main(void){
 		}
 	}
 
-	free_ignotum_mapped_addr_t(&addrs);
+	free_ignotum_mapped_addr(&addrs);
 	free_ignotum_mem_search(&result);
 
 	return 0;

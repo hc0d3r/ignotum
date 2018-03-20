@@ -327,7 +327,7 @@ ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out){
 		return ret;
 }
 
-void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **addr){
+void free_ignotum_mapped_addr(ignotum_mapped_addr_t **addr){
 	ignotum_mapped_addr_t *aux;
 
 	while(*addr){
