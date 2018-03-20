@@ -81,12 +81,12 @@ int ignotum_openmem(pid_t pid_number, int mode);
 
 ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out);
 
-int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n);
-int ignotum_memsearch(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out);
-int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n);
+int ignotum_mem_write(int mem_fd, off_t offset, const void *src, size_t n);
+int ignotum_mem_search(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out);
+int ignotum_mem_read(int mem_fd, off_t offset, void *out, size_t n);
 
-size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, long addr, size_t len);
-size_t ignotum_ptrace_memread(pid_t pid, void *output, long addr, size_t n);
+size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len);
+size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
 void free_ignotum_mapped_addr_t(ignotum_mapped_addr_t **);
 void free_ignotum_mem_search(ignotum_mem_search_t *);

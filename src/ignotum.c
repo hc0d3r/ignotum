@@ -25,7 +25,7 @@ static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
 	}
 }
 
-int ignotum_memsearch(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out){
+int ignotum_mem_search(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out){
 	int ret;
 	size_t i, j, k, string_len;
 
@@ -78,17 +78,17 @@ static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, siz
 }
 
 
-int ignotum_memwrite(int mem_fd, off_t offset, const void *src, size_t n){
+int ignotum_mem_write(int mem_fd, off_t offset, const void *src, size_t n){
 	lseek(mem_fd, offset, SEEK_SET);
 	return write(mem_fd, src, n);
 }
 
-int ignotum_memread(int mem_fd, off_t offset, void *out, size_t n){
+int ignotum_mem_read(int mem_fd, off_t offset, void *out, size_t n){
 	lseek(mem_fd, offset, SEEK_SET);
 	return read(mem_fd, out, n);
 }
 
-size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, long addr, size_t len){
+size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len){
 	size_t i, ret = 0;
 	long old_data, new_data = 0L;
 
@@ -119,7 +119,7 @@ size_t ignotum_ptrace_memwrite(pid_t pid, const void *data, long addr, size_t le
 	return ret;
 }
 
-size_t ignotum_ptrace_memread(pid_t pid, void *output, long addr, size_t n){
+size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 	size_t i, ret = 0;
 	long bytes;
 

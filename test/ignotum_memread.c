@@ -12,7 +12,7 @@ int main(void){
 	unsigned char nops[10];
 
 	mem_fd = ignotum_openmem(getpid(), O_RDWR);
-	ignotum_memread(mem_fd, (off_t)read_my_nops, nops, 10);
+	ignotum_mem_read(mem_fd, (off_t)read_my_nops, nops, 10);
 
 	for(i=0; i<10; i++){
 		printf("%x ", nops[i]);
