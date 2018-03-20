@@ -12,7 +12,7 @@ int main(void){
 
 	printf("char test[] = %p\n", test);
 
-	if( ignotum_getmappedaddr(0, &addrs) ){
+	if( ignotum_get_map_list(0, &addrs) ){
 		for(i=addrs; i!=NULL; i=i->next){
 			if(i->pathname.ptr == NULL)
 				continue;

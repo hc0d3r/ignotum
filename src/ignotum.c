@@ -174,7 +174,7 @@ char hexchar(const char x){
 	return ret;
 }
 
-ssize_t ignotum_getmappedaddr(pid_t target_pid, ignotum_mapped_addr_t **out){
+ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_mapped_addr_t **out){
 	int parser_flags = ignotum_first_addr, v = 0, end = 0, maps_fd;
 	ssize_t size, i = 0, j;
 	char buff[1024];
