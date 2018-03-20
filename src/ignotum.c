@@ -78,14 +78,12 @@ static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, siz
 }
 
 
-int ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset){
-	lseek(mem_fd, offset, SEEK_SET);
-	return write(mem_fd, src, n);
+ssize_t ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset){
+	return pwrite(mem_fd, src, n, offset);
 }
 
-int ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset){
-	lseek(mem_fd, offset, SEEK_SET);
-	return read(mem_fd, out, n);
+ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset){
+	return pread(mem_fd, out, n, offset);
 }
 
 size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len){
