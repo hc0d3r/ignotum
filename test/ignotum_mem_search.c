@@ -14,12 +14,12 @@ int main(void){
 
 	if( ignotum_get_map_list(0, &addrs) ){
 		for(i=addrs; i!=NULL; i=i->next){
-			if(i->pathname.ptr == NULL)
+			if(i->map->pathname.ptr == NULL)
 				continue;
 
-			if(!strcmp("[stack]", i->pathname.ptr)){
+			if(!strcmp("[stack]", i->map->pathname.ptr)){
 				mem_fd = ignotum_openmem(getpid(), O_RDONLY);
-				ignotum_mem_search("leet", 4, mem_fd , i->range, &result);
+				ignotum_mem_search("leet", 4, mem_fd , i->map->range, &result);
 
 				if(result.len){
 					for(j=0; j<result.len; j++){
