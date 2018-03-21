@@ -329,6 +329,163 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 		return ret;
 }
 
+ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
+	ignotum_map_info_t *ret = NULL;
+	int parser_flags = ignotum_first_addr;
+	int maps_fd, size, i, j, v = 0, end = 0;
+	char buf[1024];
+
+	if(pid)
+		snprintf(buf, sizeof(buf), "/proc/%d/maps", pid);
+	else
+		memcpy(buf, "/proc/self/maps", 16);
+
+	if((maps_fd = open(buf, O_RDONLY)) == -1){
+		goto end;
+	}
+
+
+	ignotum_map_info_t tmp;
+	memset(&tmp, 0, sizeof(tmp));
+
+	while( (size = read(maps_fd, buf, sizeof(buf))) > 0 ){
+		for(i=0; i<size; i++){
+			char c = buf[i];
+
+			switch(parser_flags){
+				case ignotum_first_addr:
+					if(c != '-'){
+						tmp.range.start_addr <<= 4;
+						tmp.range.start_addr += hexchar(c);
+					} else {
+						//printf("primeiro addr acabou ... %lx <= %lx ? %d\n", tmp.range.start_addr, addr, (tmp.range.start_addr <= addr));
+						//getchar();
+						if(tmp.range.start_addr <= addr){
+							parser_flags = ignotum_second_addr;
+						} else {
+							tmp.range.start_addr = 0;
+							parser_flags = ignotum_skip_line;
+						}
+					}
+				break;
+
+				case ignotum_second_addr:
+					if(c != ' '){
+						tmp.range.end_addr <<= 4;
+						tmp.range.end_addr += hexchar(c);
+					} else {
+						if(addr <= tmp.range.end_addr){
+							parser_flags = ignotum_flags;
+						} else {
+							tmp.range.start_addr = 0;
+							tmp.range.end_addr = 0;
+							parser_flags = ignotum_skip_line;
+						}
+					}
+				break;
+
+				case ignotum_flags:
+					if(c == '-')
+						v = 0;
+					else if(c == 'r')
+						v = ignotum_read;
+					else if(c == 'x')
+						v = ignotum_exec;
+					else if(c == 'w')
+						v = ignotum_write;
+					else if(c == 'p')
+						v = ignotum_private;
+					else if(c == 's')
+						v = ignotum_shared;
+					else if(c == ' '){
+						parser_flags = ignotum_offset;
+						break;
+					}
+
+					tmp.perms |= v;
+				break;
+
+				case ignotum_offset:
+					if(c != ' '){
+						tmp.offset <<= 4;
+						tmp.offset += hexchar(c);
+					} else {
+						parser_flags = ignotum_dev;
+					}
+				break;
+
+				case ignotum_dev:
+					if(c == ':'){
+						break;
+					}
+
+					else if(c == ' '){
+						parser_flags = ignotum_inode;
+					}
+
+					else {
+						tmp.st_dev <<= 4;
+						tmp.st_dev += hexchar(c);
+					}
+				break;
+
+				case ignotum_inode:
+					if(c != ' '){
+						tmp.st_ino *= 10;
+						tmp.st_ino += c-'0';
+					} else {
+						parser_flags = ignotum_skip_space;
+					}
+				break;
+
+				case ignotum_skip_space:
+					for(; i<size; i++){
+						if(buf[i] == '\n'){
+							ret = malloc(sizeof(ignotum_map_info_t));
+							memcpy(ret, &tmp, sizeof(ignotum_map_info_t));
+							goto end;
+
+						} else if(buf[i] != ' '){
+							i--;
+							parser_flags = ignotum_pathname;
+							break;
+						}
+					}
+				break;
+
+				case ignotum_pathname:
+					for(j=i; i<size; i++){
+						if(buf[i] == '\n'){
+							end = 1;
+							break;
+						}
+					}
+
+					ignotum_string_t_copy(&tmp.pathname, &(buf[j]), i-j);
+
+					if(end){
+						ret = malloc(sizeof(ignotum_map_info_t));
+						memcpy(ret, &tmp, sizeof(ignotum_map_info_t));
+						goto end;
+					}
+
+				break;
+
+				case ignotum_skip_line:
+					if(c == '\n'){
+						parser_flags = ignotum_first_addr;
+					}
+				break;
+			}
+		}
+	}
+
+
+
+	end:
+		return ret;
+}
+
 void free_ignotum_map_list(ignotum_map_list_t **addr){
 	ignotum_map_list_t *aux;
 
@@ -342,6 +499,11 @@ void free_ignotum_map_list(ignotum_map_list_t **addr){
 
 	addr = NULL;
 
+}
+
+void free_ignotum_map_info(ignotum_map_info_t *info){
+	free(info->pathname.ptr);
+	free(info);
 }
 
 void free_ignotum_mem_search(ignotum_mem_search_t *search_res){
