@@ -8,6 +8,7 @@ a simple lib to help read and write in mapped memory regions of a linux process
 int ignotum_openmem(pid_t pid_number, int mode);
 
 size_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
+ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
 
 ssize_t ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset);
 ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset);
@@ -19,6 +20,7 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr);
 
 
 void free_ignotum_map_list(ignotum_mapped_addr_t **);
+void free_ignotum_map_info(ignotum_map_info_t *info);
 void free_ignotum_mem_search(ignotum_mem_search_t *);
 
 ```
