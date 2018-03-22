@@ -25,7 +25,7 @@ static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
 	}
 }
 
-int ignotum_mem_search(const void *search, size_t search_size, int mem_fd, ignotum_addr_range_t range, ignotum_mem_search_t *out){
+int ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
 	int ret;
 	size_t i, j, k, string_len;
 
