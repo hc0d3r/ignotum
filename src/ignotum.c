@@ -483,6 +483,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 
 
 	end:
+		close(maps_fd);
 		return ret;
 }
 
