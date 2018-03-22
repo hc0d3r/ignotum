@@ -492,9 +492,8 @@ void free_ignotum_map_list(ignotum_map_list_t **addr){
 
 	while(*addr){
 		aux = (*addr)->next;
-		ignotum_free((*addr)->map->pathname.ptr);
-		ignotum_free((*addr)->map);
-		ignotum_free(*addr);
+		free_ignotum_map_info((*addr)->map);
+		free(*addr);
 		*addr = aux;
 	}
 
