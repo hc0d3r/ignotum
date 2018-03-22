@@ -25,8 +25,8 @@ static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
 	}
 }
 
-int ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
-	int ret;
+ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
+	ssize_t ret = -1;
 	size_t i, j, k, string_len;
 
 	size_t len = (size_t)(range.end_addr-range.start_addr);
@@ -36,14 +36,13 @@ int ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignot
 
 	char *ptr = malloc(len);
 	if(ptr == NULL){
-		return -1;
+		goto end;
 	}
 
-	lseek(mem_fd, range.start_addr, SEEK_SET);
-	ret = read(mem_fd, ptr, len);
+	ret = pread(mem_fd, ptr, len, range.start_addr);
 
-	if(ret <= 0 || (size_t)ret < len){
-		return -1;
+	if(ret <= 0){
+		goto end;
 	}
 
 	string_len = (size_t)ret;
@@ -59,7 +58,8 @@ int ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignot
 
 	ignotum_free(ptr);
 
-	return ret;
+	end:
+		return ret;
 
 }
 
