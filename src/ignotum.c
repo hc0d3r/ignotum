@@ -63,7 +63,7 @@ ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, i
 
 }
 
-static void ignotum_string_t_copy(ignotum_string_t *string, const char *src, size_t src_size){
+static void ignotum_string_copy(ignotum_string_t *string, const char *src, size_t src_size){
 	if(!string->size){
 		string->ptr = malloc( sizeof(char) * (src_size+1) );
 		strncpy(string->ptr, src, src_size);
@@ -301,7 +301,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 						}
 					}
 
-					ignotum_string_t_copy(&tmp.pathname, &(buff[j]), i-j);
+					ignotum_string_copy(&tmp.pathname, &(buff[j]), i-j);
 
 					if(end){
 						aux = malloc(sizeof(ignotum_map_info_t));
@@ -461,7 +461,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 						}
 					}
 
-					ignotum_string_t_copy(&tmp.pathname, &(buf[j]), i-j);
+					ignotum_string_copy(&tmp.pathname, &(buf[j]), i-j);
 
 					if(end){
 						ret = malloc(sizeof(ignotum_map_info_t));
