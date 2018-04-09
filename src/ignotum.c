@@ -117,36 +117,55 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len){
 	return ret;
 }
 
+
 size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
-	size_t i, ret = 0;
-	long bytes;
+	long aligned_addr, bytes;
+	size_t i = 0, offset, ret = 0;
 
-	for(i=0; (i+wordsize)<n; i+=wordsize){
-		bytes = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
+	aligned_addr = addr & (long)(-wordsize);
+
+	offset = addr - aligned_addr;
+	if(!offset)
+		goto loop;
+
+	bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
+	if(errno)
+		goto end;
+
+	if(wordsize > n){
+		ret = n;
+	} else {
+		ret = wordsize-offset;
+	}
+
+
+	i = ret;
+	memcpy(output, ((char *)(&bytes)+offset), ret);
+	aligned_addr += wordsize;
+
+
+	loop:
+
+	for(; i<n; i+=wordsize){
+
+		bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
 		if(errno)
-			return ret;
+			goto end;
 
-		*(long *)(output+i) = bytes;
-		ret += wordsize;
+		if(i+wordsize > n){
+			ret += n-i;
+			memcpy(output+i, &bytes, n-i);
+			break;
+		} else {
+			*(long *)(output+ret) = bytes;
+			ret += wordsize;
+		}
+		aligned_addr += wordsize;
 	}
 
-	n -= i;
-
-	bytes = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
-
-	if(!errno){
-		if(n == wordsize)
-			*(long *)(output+i) = bytes;
-		else
-			memcpy(output+i, &bytes, n);
-
-		ret += n;
-
-	}
-
-	return ret;
+	end:
+		return ret;
 }
-
 
 int ignotum_openmem(pid_t pid_number, int mode){
 	char filename[6 + MAX10_PID_T_STR + 5];
