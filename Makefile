@@ -38,7 +38,7 @@ install: all
 	$(INSTALLPROG) ./src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
 
 uninstall:
-	-rm -f $(INSTALL_LIB_DIR)/libignotum.so $(INSTALL_HEADER_DIR)/ignotum.h
+	-rm -f $(INSTALL_LIB_DIR)/libignotum.so $(INSTALL_LIB_DIR)/libignotum.a $(INSTALL_HEADER_DIR)/ignotum.h
 
 test: all
 	$(MAKE) -C $(TEST_DIR)
