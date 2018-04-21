@@ -181,7 +181,9 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 	if(errno)
 		goto end;
 
-	ret = (wordsize > n) ? n : (wordsize-offset);
+	ret = wordsize-offset;
+	if(ret > n)
+		ret = n;
 
 	memcpy(output, ((char *)(&bytes)+offset), ret);
 	aligned_addr += wordsize;
