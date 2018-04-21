@@ -34,6 +34,7 @@ $(SHARED_OBJ): $(OBJ)
 
 install: all
 	$(INSTALLPROG) $(SHARED_OBJ) $(INSTALL_LIB_DIR)/libignotum.so
+	$(INSTALLPROG) $(STATIC_OBJ) $(INSTALL_LIB_DIR)/libignotum.a
 	$(INSTALLPROG) ./src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
 
 uninstall:
