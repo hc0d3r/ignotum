@@ -86,35 +86,87 @@ ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset){
 	return pread(mem_fd, out, n, offset);
 }
 
-size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len){
-	size_t i, ret = 0;
-	long old_data, new_data = 0L;
+size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
+	long aligned_addr, old_bytes, new_bytes;
+	size_t offset, ret = 0, aux;
+	unsigned long bitmask;
 
-	for(i=0; (i+wordsize)<len; i+=wordsize){
-		ptrace(PTRACE_POKEDATA, pid, addr+i, *(long *)(data+i));
+	if(!n)
+		goto end;
+
+	aligned_addr = addr & (long)(-wordsize);
+	offset = addr - aligned_addr;
+
+	aux = wordsize-offset;
+	if(aux > n)
+		aux = n;
+
+	if(aux == wordsize){
+		ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)data);
 		if(errno)
-			return ret;
+			goto end;
+	} else {
+		old_bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
+		if(errno)
+			goto end;
+
+		new_bytes = 0;
+
+		if(!offset)
+			bitmask = 0;
+		else
+			bitmask = -1UL >> (wordsize-offset)*8;
+
+		if((aux+offset) < wordsize){
+			bitmask |= (~bitmask) << (aux * 8);
+		}
+
+		old_bytes &= bitmask;
+
+		memcpy(((char *)(&new_bytes)+offset), data, aux);
+		new_bytes |= old_bytes;
+
+		ptrace(PTRACE_POKEDATA, pid, aligned_addr, new_bytes);
+		if(errno)
+			goto end;
+	}
+
+	ret = aux;
+
+	while(ret < n){
+		aligned_addr += wordsize;
+
+		if((ret+wordsize) > n){
+			aux = n-ret;
+
+			old_bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
+			if(errno)
+				goto end;
+
+			new_bytes = 0;
+			memcpy(&new_bytes, data+ret, aux);
+
+			old_bytes &= -1UL << (aux * 8);
+			new_bytes |= old_bytes;
+
+			ptrace(PTRACE_POKEDATA, pid, aligned_addr, new_bytes);
+			if(errno)
+				goto end;
+
+			ret += aux;
+
+			break;
+		}
+
+		ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)(data+ret));
+		if(errno)
+			goto end;
 
 		ret += wordsize;
 	}
 
-	len -= i;
-
-	if(len == wordsize){
-		new_data = *(long *)(data+i);
-	} else {
-		memcpy(&new_data, data+i, len);
-		old_data = ptrace(PTRACE_PEEKDATA, pid, addr+i, 0L);
-		old_data &= (unsigned long)-1 << (8*len);
-		new_data |= old_data;
-	}
-
-	ptrace(PTRACE_POKEDATA, pid, addr+i, new_data);
-	if(!errno)
-		ret += len;
-
-
-	return ret;
+	end:
+		return ret;
 }
 
 
