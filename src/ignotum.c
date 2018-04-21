@@ -120,46 +120,36 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t len){
 
 size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 	long aligned_addr, bytes;
-	size_t i = 0, offset, ret = 0;
+	size_t offset, ret = 0;
 
 	aligned_addr = addr & (long)(-wordsize);
-
 	offset = addr - aligned_addr;
-	if(!offset)
-		goto loop;
 
 	bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
 	if(errno)
 		goto end;
 
-	if(wordsize > n){
-		ret = n;
-	} else {
-		ret = wordsize-offset;
-	}
+	ret = (wordsize > n) ? n : (wordsize-offset);
 
-
-	i = ret;
 	memcpy(output, ((char *)(&bytes)+offset), ret);
 	aligned_addr += wordsize;
 
 
-	loop:
-
-	for(; i<n; i+=wordsize){
-
+	while(ret < n){
 		bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
 		if(errno)
 			goto end;
 
-		if(i+wordsize > n){
-			ret += n-i;
-			memcpy(output+i, &bytes, n-i);
+		if((ret+wordsize) > n){
+			size_t tmp = n-ret;
+			memcpy(output+ret, &bytes, tmp);
+			ret += tmp;
 			break;
-		} else {
-			*(long *)(output+ret) = bytes;
-			ret += wordsize;
 		}
+
+		*(long *)(output+ret) = bytes;
+
+		ret += wordsize;
 		aligned_addr += wordsize;
 	}
 
