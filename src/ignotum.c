@@ -5,6 +5,17 @@
 
 #include <ignotum.h>
 
+/* size constant */
+#define SIGNED_OVERFLOW_PID_T (pid_t)~((pid_t)1 << ((sizeof(pid_t)*8)-1)) /* 0b100000000000000... */
+#define MAX10_PID_T_STR (10*sizeof(pid_t)*CHAR_BIT/33+3) /* note that it dont include minus signal */
+#define PATHNAME_LEN 1024
+#define wordsize sizeof(long)
+
+/* function macros */
+#define check_hex_digit(c) ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
+#define ignotum_free(x) __safefree((void **)&(x))
+
+
 /* check if pointer is null, if not free and set it to null, to evite
  * wild pointers
  */

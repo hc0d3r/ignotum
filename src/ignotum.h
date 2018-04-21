@@ -10,16 +10,6 @@
 #define DEFAULT_IGNOTUM_ADDR_LIST (struct ignotum_addr_list){ DEFAULT_IGNOTUM_ADDR_RANGE, 0, 0, 0, 0, DEFAULT_IGNOTUM_STRING, NULL }
 #define DEFAULT_IGNOTUM_MEMSEARCH (struct ignotum_mem_search){ 0, NULL }
 
-/* size constant */
-#define SIGNED_OVERFLOW_PID_T (pid_t)~((pid_t)1 << ((sizeof(pid_t)*8)-1)) /* 0b100000000000000... */
-#define MAX10_PID_T_STR (10*sizeof(pid_t)*CHAR_BIT/33+3) /* note that it dont include minus signal */
-#define PATHNAME_LEN 1024
-#define wordsize sizeof(long)
-
-/* function macros */
-#define check_hex_digit(c) ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
-#define ignotum_free(x) __safefree((void **)&(x))
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
