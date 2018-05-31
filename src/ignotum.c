@@ -15,6 +15,10 @@
 #define check_hex_digit(c) ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
 #define ignotum_free(x) __safefree((void **)&(x))
 
+typedef struct ignotum_string {
+	char *ptr;
+	size_t size;
+} ignotum_string_t;
 
 /* check if pointer is null, if not free and set it to null, to evite
  * wild pointers
@@ -265,7 +269,10 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 	}
 
 	ignotum_map_info_t tmp, *aux;
+	ignotum_string_t aux_string;
+
 	memset(&tmp, 0, sizeof(tmp));
+	memset(&aux_string, 0, sizeof(aux_string));
 
 	while( (size = read(maps_fd, buff, sizeof(buff))) > 0 ){
 		for(i=0; i<size; i++){
@@ -375,10 +382,12 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 						}
 					}
 
-					ignotum_string_copy(&tmp.pathname, &(buff[j]), i-j);
+					ignotum_string_copy(&aux_string, &(buff[j]), i-j);
 
 					if(end){
 						aux = malloc(sizeof(ignotum_map_info_t));
+						tmp.pathname = aux_string.ptr;
+
 						memcpy(aux, &tmp, sizeof(ignotum_map_info_t));
 
 						*out = malloc(sizeof(ignotum_map_list_t));
@@ -388,6 +397,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 
 						parser_flags = ignotum_first_addr;
 						memset(&tmp, 0, sizeof(tmp));
+						memset(&aux_string, 0, sizeof(aux_string));
 						end = 0;
 						ret++;
 					}
@@ -420,7 +430,10 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 
 
 	ignotum_map_info_t tmp;
+	ignotum_string_t aux_string;
+
 	memset(&tmp, 0, sizeof(tmp));
+	memset(&aux_string, 0, sizeof(aux_string));
 
 	while( (size = read(maps_fd, buf, sizeof(buf))) > 0 ){
 		for(i=0; i<size; i++){
@@ -535,11 +548,12 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 						}
 					}
 
-					ignotum_string_copy(&tmp.pathname, &(buf[j]), i-j);
+					ignotum_string_copy(&aux_string, &(buf[j]), i-j);
 
 					if(end){
 						ret = malloc(sizeof(ignotum_map_info_t));
 						memcpy(ret, &tmp, sizeof(ignotum_map_info_t));
+						ret->pathname = aux_string.ptr;
 						goto end;
 					}
 
@@ -576,7 +590,7 @@ void free_ignotum_map_list(ignotum_map_list_t **addr){
 }
 
 void free_ignotum_map_info(ignotum_map_info_t *info){
-	free(info->pathname.ptr);
+	free(info->pathname);
 	free(info);
 }
 

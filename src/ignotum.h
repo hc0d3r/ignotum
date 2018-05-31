@@ -23,11 +23,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-typedef struct ignotum_string {
-	char *ptr;
-	size_t size;
-} ignotum_string_t;
-
 typedef struct ignotum_addr_range {
 	off_t start_addr;
 	off_t end_addr;
@@ -44,7 +39,7 @@ typedef struct ignotum_map_info {
 	off_t offset;
 	dev_t st_dev;
 	ino_t st_ino;
-	ignotum_string_t pathname;
+	char *pathname;
 } ignotum_map_info_t;
 
 typedef struct ignotum_mem_search {
