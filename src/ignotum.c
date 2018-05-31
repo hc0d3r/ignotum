@@ -77,12 +77,12 @@ ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, i
 static void ignotum_string_copy(ignotum_string_t *string, const char *src, size_t src_size){
 	if(!string->size){
 		string->ptr = malloc( sizeof(char) * (src_size+1) );
-		strncpy(string->ptr, src, src_size);
+		memcpy(string->ptr, src, src_size);
 		string->size = src_size;
 		string->ptr[src_size] = 0;
 	} else {
 		string->ptr = realloc(string->ptr, string->size+1 + src_size);
-		strncpy(string->ptr+string->size, src, src_size);
+		memcpy(string->ptr+string->size, src, src_size);
 		string->size = src_size+string->size;
 		string->ptr[string->size] = 0;
 	}
