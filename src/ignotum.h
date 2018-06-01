@@ -10,18 +10,8 @@
 #define DEFAULT_IGNOTUM_ADDR_LIST (struct ignotum_addr_list){ DEFAULT_IGNOTUM_ADDR_RANGE, 0, 0, 0, 0, DEFAULT_IGNOTUM_STRING, NULL }
 #define DEFAULT_IGNOTUM_MEMSEARCH (struct ignotum_search){ 0, NULL }
 
+#include <stddef.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <sys/ptrace.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
 
 typedef struct ignotum_map_list {
 	struct ignotum_map_info *map;
