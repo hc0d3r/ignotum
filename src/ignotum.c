@@ -273,8 +273,8 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 			switch(parser_flags){
 				case ignotum_first_addr:
 					if(c != '-'){
-						tmp.range.start_addr <<= 4;
-						tmp.range.start_addr += hexchar(c);
+						tmp.start_addr <<= 4;
+						tmp.start_addr += hexchar(c);
 					} else {
 						parser_flags = ignotum_second_addr;
 					}
@@ -282,8 +282,8 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 
 				case ignotum_second_addr:
 					if(c != ' '){
-						tmp.range.end_addr <<= 4;
-						tmp.range.end_addr += hexchar(c);
+						tmp.end_addr <<= 4;
+						tmp.end_addr += hexchar(c);
 					} else {
 						parser_flags = ignotum_flags;
 					}
@@ -434,15 +434,15 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 			switch(parser_flags){
 				case ignotum_first_addr:
 					if(c != '-'){
-						tmp.range.start_addr <<= 4;
-						tmp.range.start_addr += hexchar(c);
+						tmp.start_addr <<= 4;
+						tmp.start_addr += hexchar(c);
 					} else {
 						//printf("primeiro addr acabou ... %lx <= %lx ? %d\n", tmp.range.start_addr, addr, (tmp.range.start_addr <= addr));
 						//getchar();
-						if(tmp.range.start_addr <= addr){
+						if(tmp.start_addr <= addr){
 							parser_flags = ignotum_second_addr;
 						} else {
-							tmp.range.start_addr = 0;
+							tmp.start_addr = 0;
 							parser_flags = ignotum_skip_line;
 						}
 					}
@@ -450,14 +450,14 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 
 				case ignotum_second_addr:
 					if(c != ' '){
-						tmp.range.end_addr <<= 4;
-						tmp.range.end_addr += hexchar(c);
+						tmp.end_addr <<= 4;
+						tmp.end_addr += hexchar(c);
 					} else {
-						if(addr <= tmp.range.end_addr){
+						if(addr <= tmp.end_addr){
 							parser_flags = ignotum_flags;
 						} else {
-							tmp.range.start_addr = 0;
-							tmp.range.end_addr = 0;
+							tmp.start_addr = 0;
+							tmp.end_addr = 0;
 							parser_flags = ignotum_skip_line;
 						}
 					}

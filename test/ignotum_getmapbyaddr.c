@@ -6,7 +6,7 @@ int main(void){
 	ignotum_map_info_t *map;
 
 	map = ignotum_getmapbyaddr(0, (off_t)stack_variable);
-	printf("stack_variable: %lx, ranges: %lx | %lx, pathname: %s\n", (off_t)stack_variable, map->range.start_addr, map->range.end_addr, map->pathname);
+	printf("stack_variable: %lx, ranges: %lx | %lx, pathname: %s\n", (off_t)stack_variable, map->start_addr, map->end_addr, map->pathname);
 	free_ignotum_map_info(map);
 
 	map = ignotum_getmapbyaddr(0, (off_t)malloc(0));

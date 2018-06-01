@@ -10,7 +10,7 @@ int main(void){
 	/* 0 will open /proc/self/maps */
 	if( ignotum_get_map_list(0, &addrs) > 0 ){
 		for(i=addrs; i!=NULL; i=i->next){
-			printf("start-address-> %zx | end-address-> %zx\n", i->map->range.start_addr, i->map->range.end_addr);
+			printf("start-address-> %zx | end-address-> %zx\n", i->map->start_addr, i->map->end_addr);
 		}
 	}
 

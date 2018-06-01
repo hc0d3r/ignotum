@@ -23,18 +23,14 @@
 #include <stdlib.h>
 #include <errno.h>
 
-typedef struct ignotum_addr_range {
-	off_t start_addr;
-	off_t end_addr;
-} ignotum_addr_range_t;
-
 typedef struct ignotum_map_list {
 	struct ignotum_map_info *map;
 	struct ignotum_map_list *next;
 } ignotum_map_list_t;
 
 typedef struct ignotum_map_info {
-	ignotum_addr_range_t range;
+	off_t start_addr;
+	off_t end_addr;
 	int perms;
 	off_t offset;
 	dev_t st_dev;

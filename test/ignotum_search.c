@@ -20,11 +20,11 @@ int main(void){
 
 			if(!strcmp("[stack]", i->map->pathname)){
 				mem_fd = ignotum_openmem(0, O_RDONLY);
-				size_t len = i->map->range.end_addr-i->map->range.start_addr;
+				size_t len = i->map->end_addr-i->map->start_addr;
 				char *data = malloc(len);
 
-				len = ignotum_mem_read(mem_fd, data, len, i->map->range.start_addr);
-				result = ignotum_search(i->map->range.start_addr, data, len, "leet", 4);
+				len = ignotum_mem_read(mem_fd, data, len, i->map->start_addr);
+				result = ignotum_search(i->map->start_addr, data, len, "leet", 4);
 
 				if(result){
 					for(j=0; j<result->len; j++){
