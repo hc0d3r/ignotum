@@ -8,7 +8,8 @@ int main(void){
 	(void)test;
 
 	ignotum_map_list_t *addrs = NULL, *i = NULL;
-	ignotum_mem_search_t result = DEFAULT_IGNOTUM_MEMSEARCH;
+	ignotum_search_t *result = NULL;
+	// = DEFAULT_IGNOTUM_MEMSEARCH;
 
 	printf("char test[] = %p\n", test);
 
@@ -18,13 +19,19 @@ int main(void){
 				continue;
 
 			if(!strcmp("[stack]", i->map->pathname)){
-				mem_fd = ignotum_openmem(getpid(), O_RDONLY);
-				ignotum_mem_search(mem_fd, "leet", 4, i->map->range, &result);
+				mem_fd = ignotum_openmem(0, O_RDONLY);
+				size_t len = i->map->range.end_addr-i->map->range.start_addr;
+				char *data = malloc(len);
 
-				if(result.len){
-					for(j=0; j<result.len; j++){
-						printf("leet found at =: %zx | %s\n", result.addrs[j], (char *)result.addrs[j] );
+				len = ignotum_mem_read(mem_fd, data, len, i->map->range.start_addr);
+				result = ignotum_search(i->map->range.start_addr, data, len, "leet", 4);
+
+				if(result){
+					for(j=0; j<result->len; j++){
+						printf("leet found at =: %zx | %s\n", result->addrs[j], (char *)result->addrs[j] );
 					}
+
+					free_ignotum_search(result);
 				}
 
 				close(mem_fd);
@@ -34,8 +41,6 @@ int main(void){
 	}
 
 	free_ignotum_map_list(&addrs);
-	free_ignotum_mem_search(&result);
-
 	return 0;
 
 }

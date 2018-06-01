@@ -30,7 +30,7 @@ static void __safefree(void **pp){
 	}
 }
 
-static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
+static void ignotum_mem_search_alloc(ignotum_search_t *out){
 	if(!out->len){
 		out->addrs = malloc(sizeof(off_t));
 		out->len = 1;
@@ -40,38 +40,31 @@ static void ignotum_mem_search_alloc(ignotum_mem_search_t *out){
 	}
 }
 
-ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
-	ssize_t ret = -1;
-	size_t i, j, k, string_len;
+ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen){
+//ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
+	ignotum_search_t *ret = NULL;
+	size_t i, j, k;
 
-	size_t len = (size_t)(range.end_addr-range.start_addr);
-	if(!len || search_size > len){
-		return -1;
-	}
-
-	char *ptr = malloc(len);
-	if(ptr == NULL){
+	if(!hlen || nlen > hlen){
 		goto end;
 	}
 
-	ret = pread(mem_fd, ptr, len, range.start_addr);
+	ret = calloc(1, sizeof(ignotum_search_t));
 
-	if(ret <= 0){
-		goto end;
-	}
-
-	string_len = (size_t)ret;
-
-	for(i=0;i<string_len;i++){
-		for(j=i, k=0; j<string_len && k<search_size && *(ptr+j) == *(char *)(search+k); j++, k++ ){
-			if(k == search_size-1){
-				ignotum_mem_search_alloc(out);
-				out->addrs[out->len-1] = range.start_addr+i;
+	for(i=0;i<hlen;i++){
+		for(j=i, k=0; j<hlen && k<nlen && *(char *)(haystack+j) == *(char *)(needle+k); j++, k++){
+			if(k == nlen-1){
+				ignotum_mem_search_alloc(ret);
+				ret->addrs[ret->len-1] = remote_addr+i;
 			}
+
 		}
 	}
 
-	ignotum_free(ptr);
+	if(!ret->len){
+		free(ret);
+		ret = NULL;
+	}
 
 	end:
 		return ret;
@@ -594,8 +587,8 @@ void free_ignotum_map_info(ignotum_map_info_t *info){
 	free(info);
 }
 
-void free_ignotum_mem_search(ignotum_mem_search_t *search_res){
-	if(search_res->len){
+void free_ignotum_search(ignotum_search_t *search_res){
+	if(search_res && search_res->len){
 		ignotum_free(search_res->addrs);
 		search_res->len = 0;
 	}

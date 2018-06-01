@@ -7,21 +7,20 @@ a simple lib to help read and write in mapped memory regions of a linux process
 ```c
 int ignotum_openmem(pid_t pid_number, int mode);
 
-size_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
+ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
 ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
 
 ssize_t ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset);
 ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset);
-ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out);
 
+size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n);
+size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
-size_t ignotum_ptrace_write(pid_t pid, const void *data, size_t len, long addr);
-size_t ignotum_ptrace_read(pid_t pid, void *output, size_t n, long addr);
+ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
 
-
-void free_ignotum_map_list(ignotum_mapped_addr_t **);
+void free_ignotum_map_list(ignotum_map_list_t **);
 void free_ignotum_map_info(ignotum_map_info_t *info);
-void free_ignotum_mem_search(ignotum_mem_search_t *);
+void free_ignotum_search(ignotum_search_t *);
 
 ```
 
@@ -47,10 +46,10 @@ typedef struct ignotum_map_info {
 	char *pathname;
 } ignotum_map_info_t;
 
-typedef struct ignotum_mem_search {
+typedef struct ignotum_search {
     size_t len;
     off_t *addrs;
-} ignotum_mem_search_t;
+} ignotum_search_t;
 
 ```
 
