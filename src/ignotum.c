@@ -41,7 +41,6 @@ static void ignotum_mem_search_alloc(ignotum_search_t *out){
 }
 
 ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen){
-//ssize_t ignotum_mem_search(int mem_fd, const void *search, size_t search_size, ignotum_addr_range_t range, ignotum_mem_search_t *out){
 	ignotum_search_t *ret = NULL;
 	size_t i, j, k;
 
