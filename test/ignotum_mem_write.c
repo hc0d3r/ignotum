@@ -1,4 +1,7 @@
 #include <ignotum.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
 
 int main(void){
 	static const char change_me[]="You cannot change me !!!";

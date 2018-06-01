@@ -2,7 +2,10 @@
 
 
 #include <ignotum.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <err.h>
+#include <fcntl.h>
 
 int main(void){
 	pid_t target_pid;

@@ -4,6 +4,9 @@
  */
 
 #include <ignotum.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
 
 void read_my_nops(void);
 

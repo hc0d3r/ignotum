@@ -1,5 +1,6 @@
 #include <ignotum.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int main(void){
 	char stack_variable[]="this intead to be in stack\n";
