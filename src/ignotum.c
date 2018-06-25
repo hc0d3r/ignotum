@@ -20,7 +20,6 @@
 
 /* size constant */
 #define SIGNED_OVERFLOW_PID_T (pid_t)~((pid_t)1 << ((sizeof(pid_t)*8)-1)) /* 0b100000000000000... */
-#define MAX10_PID_T_STR (10*sizeof(pid_t)*CHAR_BIT/33+3) /* note that it dont include minus signal */
 #define PATHNAME_LEN 1024
 #define wordsize sizeof(long)
 
@@ -232,7 +231,7 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 }
 
 int ignotum_openmem(pid_t pid_number, int mode){
-	char filename[6 + MAX10_PID_T_STR + 5];
+	char filename[32];
 	if(pid_number == 0){
 		memcpy(filename, "/proc/self/mem", 15);
 	} else {
