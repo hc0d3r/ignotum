@@ -430,7 +430,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 		memcpy(buf, "/proc/self/maps", 16);
 
 	if((maps_fd = open(buf, O_RDONLY)) == -1){
-		goto end;
+		goto open_fail;
 	}
 
 
@@ -577,6 +577,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 
 	end:
 		close(maps_fd);
+	open_fail:
 		return ret;
 }
 
