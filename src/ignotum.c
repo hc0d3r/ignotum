@@ -236,7 +236,7 @@ int ignotum_openmem(pid_t pid_number, int mode){
 	if(pid_number == 0){
 		memcpy(filename, "/proc/self/mem", 15);
 	} else {
-		snprintf(filename, sizeof(filename), "/proc/%d/mem", pid_number);
+		sprintf(filename, "/proc/%d/mem", pid_number);
 	}
 
 	return open(filename, mode);
@@ -260,16 +260,16 @@ char hexchar(const char x){
 ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 	int parser_flags = ignotum_first_addr, v = 0, end = 0, maps_fd;
 	ssize_t size, i = 0, j;
-	char buff[1024];
+	char buf[1024];
 
 	ssize_t ret = -1;
 
 	if(target_pid)
-		snprintf(buff, sizeof(buff), "/proc/%d/maps", target_pid);
+		sprintf(buf, "/proc/%d/maps", target_pid);
 	else
-		memcpy(buff, "/proc/self/maps", 16);
+		memcpy(buf, "/proc/self/maps", 16);
 
-	if((maps_fd = open(buff, O_RDONLY)) == -1){
+	if((maps_fd = open(buf, O_RDONLY)) == -1){
 		goto end;
 	}
 
@@ -279,9 +279,9 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 	memset(&tmp, 0, sizeof(tmp));
 	memset(&aux_string, 0, sizeof(aux_string));
 
-	while( (size = read(maps_fd, buff, sizeof(buff))) > 0 ){
+	while( (size = read(maps_fd, buf, sizeof(buf))) > 0 ){
 		for(i=0; i<size; i++){
-			char c = buff[i];
+			char c = buf[i];
 
 			switch(parser_flags){
 				case ignotum_first_addr:
@@ -358,7 +358,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 
 				case ignotum_skip_space:
 					for(; i<size; i++){
-						if(buff[i] == '\n'){
+						if(buf[i] == '\n'){
 							aux = malloc(sizeof(ignotum_map_info_t));
 							memcpy(aux, &tmp, sizeof(ignotum_map_info_t));
 
@@ -371,7 +371,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 							memset(&tmp, 0, sizeof(ignotum_map_info_t));
 							ret++;
 							break;
-						} else if(buff[i] != ' '){
+						} else if(buf[i] != ' '){
 							i--;
 							parser_flags = ignotum_pathname;
 							break;
@@ -381,13 +381,13 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 
 				case ignotum_pathname:
 					for(j=i; i<size; i++){
-						if(buff[i] == '\n'){
+						if(buf[i] == '\n'){
 							end = 1;
 							break;
 						}
 					}
 
-					ignotum_string_copy(&aux_string, &(buff[j]), i-j);
+					ignotum_string_copy(&aux_string, &(buf[j]), i-j);
 
 					if(end){
 						aux = malloc(sizeof(ignotum_map_info_t));
@@ -425,7 +425,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 	char buf[1024];
 
 	if(pid)
-		snprintf(buf, sizeof(buf), "/proc/%d/maps", pid);
+		sprintf(buf, "/proc/%d/maps", pid);
 	else
 		memcpy(buf, "/proc/self/maps", 16);
 
