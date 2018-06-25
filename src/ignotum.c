@@ -29,7 +29,7 @@
 
 typedef struct ignotum_string {
 	char *ptr;
-	size_t size;
+	size_t len;
 } ignotum_string_t;
 
 /* check if pointer is null, if not free and set it to null, to evite
@@ -82,18 +82,11 @@ ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t
 
 }
 
-static void ignotum_string_copy(ignotum_string_t *string, const char *src, size_t src_size){
-	if(!string->size){
-		string->ptr = malloc( sizeof(char) * (src_size+1) );
-		memcpy(string->ptr, src, src_size);
-		string->size = src_size;
-		string->ptr[src_size] = 0;
-	} else {
-		string->ptr = realloc(string->ptr, string->size+1 + src_size);
-		memcpy(string->ptr+string->size, src, src_size);
-		string->size = src_size+string->size;
-		string->ptr[string->size] = 0;
-	}
+static void ignotum_string_copy(ignotum_string_t *s, const char *src, size_t size){
+	s->ptr = realloc(s->ptr, s->len+size+1);
+	memcpy(s->ptr+s->len, src, size);
+	s->len += size;
+	s->ptr[s->len] = 0;
 }
 
 
