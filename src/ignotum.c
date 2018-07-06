@@ -90,12 +90,51 @@ static void ignotum_string_copy(ignotum_string_t *s, const char *src, size_t siz
 }
 
 
-ssize_t ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset){
-	return pwrite(mem_fd, src, n, offset);
+
+ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset){
+	char pathbuf[32], *filename;
+	ssize_t ret = -1;
+
+	if(!pid){
+		filename = "/proc/self/mem";
+	} else {
+		filename = pathbuf;
+		sprintf(pathbuf, "/proc/%d/mem", pid);
+	}
+
+	int fd = open(filename, O_WRONLY);
+	if(fd == -1){
+		goto end;
+	}
+
+	ret = pwrite(fd, src, n, offset);
+	close(fd);
+
+	end:
+		return ret;
 }
 
-ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset){
-	return pread(mem_fd, out, n, offset);
+ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset){
+	char pathbuf[32], *filename;
+	ssize_t ret = -1;
+
+	if(!pid){
+		filename = "/proc/self/mem";
+	} else {
+		filename = pathbuf;
+		sprintf(pathbuf, "/proc/%d/mem", pid);
+	}
+
+	int fd = open(filename, O_RDONLY);
+	if(fd == -1){
+		goto end;
+	}
+
+	ret = pread(fd, out, n, offset);
+	close(fd);
+
+	end:
+		return ret;
 }
 
 size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){

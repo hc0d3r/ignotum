@@ -58,8 +58,8 @@ int ignotum_openmem(pid_t pid_number, int mode);
 ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
 ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
 
-ssize_t ignotum_mem_write(int mem_fd, const void *src, size_t n, off_t offset);
-ssize_t ignotum_mem_read(int mem_fd, void *out, size_t n, off_t offset);
+ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset);
+ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset);
 
 size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n);
 size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
