@@ -53,8 +53,6 @@ enum {
 	ignotum_shared = 16
 };
 
-int ignotum_openmem(pid_t pid_number, int mode);
-
 ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
 ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
 

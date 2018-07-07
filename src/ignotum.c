@@ -262,17 +262,6 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 		return ret;
 }
 
-int ignotum_openmem(pid_t pid_number, int mode){
-	char filename[32];
-	if(pid_number == 0){
-		memcpy(filename, "/proc/self/mem", 15);
-	} else {
-		sprintf(filename, "/proc/%d/mem", pid_number);
-	}
-
-	return open(filename, mode);
-}
-
 char hexchar(const char x){
 	char ret = 0;
 
