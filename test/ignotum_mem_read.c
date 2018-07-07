@@ -11,19 +11,16 @@
 void read_my_nops(void);
 
 int main(void){
-	int mem_fd, i;
+	int i;
 	unsigned char nops[10];
 
-	mem_fd = ignotum_openmem(getpid(), O_RDWR);
-	ignotum_mem_read(mem_fd, nops, 10, (off_t)read_my_nops);
+	ignotum_mem_read(0, nops, 10, (off_t)read_my_nops);
 
 	for(i=0; i<10; i++){
 		printf("%x ", nops[i]);
 	}
 
 	putchar('\n');
-
-	close(mem_fd);
 
 	return 0;
 }

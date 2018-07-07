@@ -6,7 +6,6 @@
 #include <fcntl.h>
 
 int main(void){
-	int mem_fd;
 	size_t j;
 
 	char test[]="abcdefghijklmnopq ------ leet --------";
@@ -24,11 +23,10 @@ int main(void){
 				continue;
 
 			if(!strcmp("[stack]", i->map->pathname)){
-				mem_fd = ignotum_openmem(0, O_RDONLY);
 				size_t len = i->map->end_addr-i->map->start_addr;
 				char *data = malloc(len);
 
-				len = ignotum_mem_read(mem_fd, data, len, i->map->start_addr);
+				len = ignotum_mem_read(0, data, len, i->map->start_addr);
 				result = ignotum_search(i->map->start_addr, data, len, "leet", 4);
 
 				if(result){
@@ -39,7 +37,6 @@ int main(void){
 					free_ignotum_search(result);
 				}
 
-				close(mem_fd);
 				break;
 			}
 		}
