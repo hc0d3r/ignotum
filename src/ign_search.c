@@ -24,8 +24,6 @@ size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *hays
 }
 
 void free_ignotum_search(ignotum_search_t *search_res){
-	if(search_res && search_res->len){
-		free(search_res->addrs);
-		search_res->len = 0;
-	}
+	free(search_res->addrs);
+	search_res->len = 0;
 }
