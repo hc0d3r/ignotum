@@ -1,7 +1,15 @@
 CC?=gcc
 CFLAGS+=-Wall -Wextra -O2
 
-OBJ=./lib/ignotum.o
+OBJDIR = lib
+
+OBJS =		$(OBJDIR)/ign_mem.o \
+			$(OBJDIR)/ign_ptrace.o \
+			$(OBJDIR)/ign_str.o \
+			$(OBJDIR)/ign_maps.o \
+			$(OBJDIR)/ign_search.o
+
+#OBJ=./lib/ignotum.o
 SHARED_OBJ=./lib/libignotum.so
 STATIC_OBJ=./lib/libignotum.a
 
@@ -15,27 +23,28 @@ GZIP_PAGES=$(MAN_PAGES:%=%.gz)
 MAN_PAGES_DIR=/usr/share/man
 
 
-SRC_DIR = ./src
-TEST_DIR = ./test
+SRC_DIR = src
+TEST_DIR = test
 
 
 .PHONY: all install uninstall test
 
 all: $(SHARED_OBJ) $(STATIC_OBJ)
 
-$(OBJ): $(SRC_DIR)/ignotum.c
-	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I$(SRC_DIR)
+#$(OBJ): $(SRC_DIR)/ignotum.c
+$(OBJDIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
 
-$(STATIC_OBJ): $(OBJ)
-	ar -cvr $(STATIC_OBJ) $(OBJ)
+$(STATIC_OBJ): $(OBJS)
+	ar -cvru $(STATIC_OBJ) $(OBJS)
 
-$(SHARED_OBJ): $(OBJ)
-	$(CC) -shared -o  $(SHARED_OBJ) $(OBJ) $(CFLAGS)
+$(SHARED_OBJ): $(OBJS)
+	$(CC) -shared -o  $(SHARED_OBJ) $(OBJS) $(CFLAGS)
 
 install: all
 	$(INSTALLPROG) $(SHARED_OBJ) $(INSTALL_LIB_DIR)/libignotum.so
 	$(INSTALLPROG) $(STATIC_OBJ) $(INSTALL_LIB_DIR)/libignotum.a
-	$(INSTALLPROG) ./src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
+	$(INSTALLPROG) src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
 
 uninstall:
 	-rm -f $(INSTALL_LIB_DIR)/libignotum.so $(INSTALL_LIB_DIR)/libignotum.a $(INSTALL_HEADER_DIR)/ignotum.h
