@@ -47,7 +47,7 @@ ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset);
 size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n);
 size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
-ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
+size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
 
 void free_ignotum_maplist(ignotum_maplist_t **);
 void free_ignotum_mapinfo(ignotum_mapinfo_t *info);
