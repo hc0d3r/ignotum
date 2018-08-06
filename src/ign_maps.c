@@ -1,8 +1,8 @@
 #include "ign_maps.h"
 
-ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
+ssize_t ignotum_getmaplist(pid_t target_pid, ignotum_maplist_t **out){
 	int maps_fd, flag, i, size, aux_len;
-	ignotum_map_info_t *info;
+	ignotum_mapinfo_t *info;
 	char buf[1024];
 
 	ssize_t ret = -1;
@@ -16,7 +16,7 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 		goto end;
 	}
 
-	info = calloc(1, sizeof(ignotum_map_info_t));
+	info = calloc(1, sizeof(ignotum_mapinfo_t));
 	flag = ignp_addr_start;
 	aux_len = 0;
 	ret = 0;
@@ -25,12 +25,12 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 		for(i=0; i<size;){
 			parser(info, buf, &i, size, &flag, &aux_len);
 			if(flag == ignp_end){
-				*out = malloc(sizeof(ignotum_map_list_t));
+				*out = malloc(sizeof(ignotum_maplist_t));
 				(*out)->map = info;
 				(*out)->next = NULL;
 				out = &((*out)->next);
 
-				info = calloc(1, sizeof(ignotum_map_info_t));
+				info = calloc(1, sizeof(ignotum_mapinfo_t));
 				flag = ignp_addr_start;
 				aux_len = 0;
 				ret++;
@@ -46,9 +46,9 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 		return ret;
 }
 
-ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
+ignotum_mapinfo_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 	int maps_fd, flag, i, size, aux_len;
-	ignotum_map_info_t *tmp, *ret = NULL;
+	ignotum_mapinfo_t *tmp, *ret = NULL;
 	char buf[1024];
 
 	if(pid)
@@ -61,7 +61,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 	}
 
 
-	tmp = calloc(1, sizeof(ignotum_map_info_t));
+	tmp = calloc(1, sizeof(ignotum_mapinfo_t));
 	flag = ignp_addr_start;
 	aux_len = 0;
 
@@ -74,7 +74,7 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 					goto end;
 				}
 
-				memset(tmp, 0x0, sizeof(ignotum_map_info_t));
+				memset(tmp, 0x0, sizeof(ignotum_mapinfo_t));
 				flag = ignp_addr_start;
 				aux_len = 0;
 
@@ -89,12 +89,12 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 		return ret;
 }
 
-void free_ignotum_map_list(ignotum_map_list_t **addr){
-	ignotum_map_list_t *aux;
+void free_ignotum_maplist(ignotum_maplist_t **addr){
+	ignotum_maplist_t *aux;
 
 	while(*addr){
 		aux = (*addr)->next;
-		free_ignotum_map_info((*addr)->map);
+		free_ignotum_mapinfo((*addr)->map);
 		free(*addr);
 		*addr = aux;
 	}
@@ -103,7 +103,7 @@ void free_ignotum_map_list(ignotum_map_list_t **addr){
 
 }
 
-void free_ignotum_map_info(ignotum_map_info_t *info){
+void free_ignotum_mapinfo(ignotum_mapinfo_t *info){
 	free(info->pathname);
 	free(info);
 }

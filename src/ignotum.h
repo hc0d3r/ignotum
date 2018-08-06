@@ -13,7 +13,7 @@
 typedef struct ignotum_map_list {
 	struct ignotum_map_info *map;
 	struct ignotum_map_list *next;
-} ignotum_map_list_t;
+} ignotum_maplist_t;
 
 typedef struct ignotum_map_info {
 	off_t start_addr;
@@ -23,7 +23,7 @@ typedef struct ignotum_map_info {
 	dev_t st_dev;
 	ino_t st_ino;
 	char *pathname;
-} ignotum_map_info_t;
+} ignotum_mapinfo_t;
 
 typedef struct ignotum_search {
 	size_t len;
@@ -38,8 +38,8 @@ enum {
 	ignotum_shared = 16
 };
 
-ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out);
-ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
+ssize_t ignotum_getmaplist(pid_t target_pid, ignotum_maplist_t **out);
+ignotum_mapinfo_t *ignotum_getmapbyaddr(pid_t pid, off_t addr);
 
 ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset);
 ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset);
@@ -49,8 +49,8 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
 ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
 
-void free_ignotum_map_list(ignotum_map_list_t **);
-void free_ignotum_map_info(ignotum_map_info_t *info);
+void free_ignotum_maplist(ignotum_maplist_t **);
+void free_ignotum_mapinfo(ignotum_mapinfo_t *info);
 void free_ignotum_search(ignotum_search_t *);
 
 

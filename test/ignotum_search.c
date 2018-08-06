@@ -11,13 +11,13 @@ int main(void){
 	char test[]="abcdefghijklmnopq ------ leet --------";
 	(void)test;
 
-	ignotum_map_list_t *addrs = NULL, *i = NULL;
+	ignotum_maplist_t *addrs = NULL, *i = NULL;
 	ignotum_search_t *result = NULL;
 	// = DEFAULT_IGNOTUM_MEMSEARCH;
 
 	printf("char test[] = %p\n", test);
 
-	if( ignotum_get_map_list(0, &addrs) ){
+	if( ignotum_getmaplist(0, &addrs) ){
 		for(i=addrs; i!=NULL; i=i->next){
 			if(i->map->pathname == NULL)
 				continue;
@@ -42,7 +42,7 @@ int main(void){
 		}
 	}
 
-	free_ignotum_map_list(&addrs);
+	free_ignotum_maplist(&addrs);
 	return 0;
 
 }
