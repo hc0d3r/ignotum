@@ -19,8 +19,6 @@
 #include <errno.h>
 
 /* size constant */
-#define SIGNED_OVERFLOW_PID_T (pid_t)~((pid_t)1 << ((sizeof(pid_t)*8)-1)) /* 0b100000000000000... */
-#define PATHNAME_LEN 1024
 #define wordsize sizeof(long)
 
 /* function macros */
@@ -38,11 +36,6 @@ enum {
 	ignp_pathname,
 	ignp_end,
 };
-
-typedef struct ignotum_string {
-	char *ptr;
-	size_t len;
-} ignotum_string_t;
 
 /* check if pointer is null, if not free and set it to null, to evite
  * wild pointers
@@ -93,15 +86,6 @@ ignotum_search_t *ignotum_search(off_t remote_addr, const void *haystack, size_t
 		return ret;
 
 }
-
-static void ignotum_string_copy(ignotum_string_t *s, const char *src, size_t size){
-	s->ptr = realloc(s->ptr, s->len+size+1);
-	memcpy(s->ptr+s->len, src, size);
-	s->len += size;
-	s->ptr[s->len] = 0;
-}
-
-
 
 ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset){
 	char pathbuf[32], *filename;

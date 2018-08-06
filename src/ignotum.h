@@ -33,18 +33,6 @@ typedef struct ignotum_search {
 	off_t *addrs;
 } ignotum_search_t;
 
-typedef enum {
-	ignotum_first_addr,
-	ignotum_second_addr,
-	ignotum_flags,
-	ignotum_offset,
-	ignotum_dev,
-	ignotum_inode,
-	ignotum_skip_space,
-	ignotum_skip_line,
-	ignotum_pathname
-} ignotum_maps_parser;
-
 enum {
 	ignotum_read = 1,
 	ignotum_exec = 2,
