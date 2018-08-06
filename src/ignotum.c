@@ -262,19 +262,11 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 		return ret;
 }
 
-char hexchar(const char x){
-	char ret = 0;
-
-	if( x >= '0' && x <= '9' )
-		ret = x-'0';
-
-	else if( x >= 'a' && x <= 'f' )
-		ret = x-'a'+10;
-
-	else if( x >= 'A' && x <= 'F' )
-		ret = x-'A'+10;
-
-	return ret;
+int hexchar(const char c){
+	if(c <= '9')
+		return c-'0';
+	else
+		return c-'a'+10;
 }
 
 ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
