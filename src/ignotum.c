@@ -27,6 +27,18 @@
 #define check_hex_digit(c) ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
 #define ignotum_free(x) __safefree((void **)&(x))
 
+enum {
+	ignp_addr_start,
+	ignp_addr_end,
+	ignp_flags,
+	ignp_offset,
+	ignp_dev,
+	ignp_ino,
+	ignp_skip,
+	ignp_pathname,
+	ignp_end,
+};
+
 typedef struct ignotum_string {
 	char *ptr;
 	size_t len;
@@ -269,9 +281,147 @@ int hexchar(const char c){
 		return c-'a'+10;
 }
 
+static void parser(struct ignotum_map_info *out, const char *buf, int *i, int limit,
+	int *flag, int *aux_len){
+	int aux = *i;
+	size_t len, tmp;
+	char c;
+
+	while(aux<limit && *flag != ignp_end){
+		switch(*flag){
+			case ignp_addr_start:
+				while(aux<limit){
+					c = buf[aux++];
+
+					if(c == '-'){
+						*flag = ignp_addr_end;
+						break;
+					}
+
+					out->start_addr <<= 4;
+					out->start_addr |= hexchar(c);
+				}
+			break;
+
+			case ignp_addr_end:
+				while(aux<limit){
+					c = buf[aux++];
+
+					if(c == ' '){
+						*flag = ignp_flags;
+						break;
+					}
+					out->end_addr <<= 4;
+					out->end_addr |= hexchar(c);
+				}
+			break;
+
+			case ignp_flags:
+				while(aux<limit){
+					c = buf[aux++];
+					if(c == ' '){
+						*flag = ignp_offset;
+						break;
+					}
+
+					out->perms <<= 1;
+					if(c != '-' && c != 's'){
+						out->perms |= 1;
+					}
+				}
+			break;
+
+			case ignp_offset:
+				while(aux<limit){
+					c = buf[aux++];
+
+					if(c == ' '){
+						*flag = ignp_dev;
+						break;
+					}
+
+					out->offset <<= 4;
+					out->offset |= hexchar(c);
+				}
+			break;
+
+			case ignp_dev:
+				while(aux<limit){
+					c = buf[aux++];
+
+					if(c == ' '){
+						*flag = ignp_ino;
+						break;
+					}
+
+					if(c == ':'){
+						continue;
+					}
+
+					out->st_dev <<= 4;
+					out->st_dev += hexchar(c);
+				}
+			break;
+
+			case ignp_ino:
+				while(aux<limit){
+					c = buf[aux++];
+
+					if(c == ' '){
+						*flag = ignp_skip;
+						break;
+					}
+
+					out->st_ino *= 10;
+					out->st_ino += c-'0';
+				}
+			break;
+
+			case ignp_skip:
+				while(aux<limit){
+					c = buf[aux++];
+					if(c == ' '){
+						continue;
+					} else if(c == '\n'){
+						*flag = ignp_end;
+					} else {
+						*flag = ignp_pathname;
+						aux--;
+					}
+					break;
+				}
+			break;
+
+			case ignp_pathname:
+				tmp = aux;
+
+				while(aux<limit){
+					c = buf[aux++];
+					if(c == '\n'){
+						*flag = ignp_end;
+						break;
+					}
+				}
+
+				len = aux-tmp;
+				if(*flag == ignp_end)
+					len--;
+
+				out->pathname = realloc(out->pathname, *aux_len+len+1);
+				memcpy(&(out->pathname[*aux_len]), &buf[tmp], len);
+				out->pathname[*aux_len+len] = 0x0;
+
+				*aux_len += len;
+			break;
+		}
+	}
+
+	*i = aux;
+}
+
 ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
-	int parser_flags = ignotum_first_addr, v = 0, end = 0, maps_fd;
-	ssize_t size, i = 0, j;
+	int maps_fd, flag, i, size, aux_len;
+	ignotum_map_info_t *info;
 	char buf[1024];
 
 	ssize_t ret = -1;
@@ -285,144 +435,29 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 		goto end;
 	}
 
-	ignotum_map_info_t tmp, *aux;
-	ignotum_string_t aux_string;
+	info = calloc(1, sizeof(ignotum_map_info_t));
+	flag = ignp_addr_start;
+	aux_len = 0;
+	ret = 0;
 
-	memset(&tmp, 0, sizeof(tmp));
-	memset(&aux_string, 0, sizeof(aux_string));
+	while((size = read(maps_fd, buf, sizeof(buf))) > 0 ){
+		for(i=0; i<size;){
+			parser(info, buf, &i, size, &flag, &aux_len);
+			if(flag == ignp_end){
+				*out = malloc(sizeof(ignotum_map_list_t));
+				(*out)->map = info;
+				(*out)->next = NULL;
+				out = &((*out)->next);
 
-	while( (size = read(maps_fd, buf, sizeof(buf))) > 0 ){
-		for(i=0; i<size; i++){
-			char c = buf[i];
-
-			switch(parser_flags){
-				case ignotum_first_addr:
-					if(c != '-'){
-						tmp.start_addr <<= 4;
-						tmp.start_addr += hexchar(c);
-					} else {
-						parser_flags = ignotum_second_addr;
-					}
-				break;
-
-				case ignotum_second_addr:
-					if(c != ' '){
-						tmp.end_addr <<= 4;
-						tmp.end_addr += hexchar(c);
-					} else {
-						parser_flags = ignotum_flags;
-					}
-				break;
-
-				case ignotum_flags:
-					if(c == '-')
-						v = 0;
-					else if(c == 'r')
-						v = ignotum_read;
-					else if(c == 'x')
-						v = ignotum_exec;
-					else if(c == 'w')
-						v = ignotum_write;
-					else if(c == 'p')
-						v = ignotum_private;
-					else if(c == 's')
-						v = ignotum_shared;
-					else if(c == ' '){
-						parser_flags = ignotum_offset;
-						break;
-					}
-
-					tmp.perms |= v;
-				break;
-
-				case ignotum_offset:
-					if(c != ' '){
-						tmp.offset <<= 4;
-						tmp.offset += hexchar(c);
-					} else {
-						parser_flags = ignotum_dev;
-					}
-				break;
-
-				case ignotum_dev:
-					if(c == ':'){
-						break;
-					}
-
-					else if(c == ' '){
-						parser_flags = ignotum_inode;
-					}
-
-					else {
-						tmp.st_dev <<= 4;
-						tmp.st_dev += hexchar(c);
-					}
-				break;
-
-				case ignotum_inode:
-					if(c != ' '){
-						tmp.st_ino *= 10;
-						tmp.st_ino += c-'0';
-					} else {
-						parser_flags = ignotum_skip_space;
-					}
-				break;
-
-				case ignotum_skip_space:
-					for(; i<size; i++){
-						if(buf[i] == '\n'){
-							aux = malloc(sizeof(ignotum_map_info_t));
-							memcpy(aux, &tmp, sizeof(ignotum_map_info_t));
-
-							*out = malloc(sizeof(ignotum_map_list_t));
-							(*out)->map = aux;
-							(*out)->next = NULL;
-							out = &((*out)->next);
-
-							parser_flags = ignotum_first_addr;
-							memset(&tmp, 0, sizeof(ignotum_map_info_t));
-							ret++;
-							break;
-						} else if(buf[i] != ' '){
-							i--;
-							parser_flags = ignotum_pathname;
-							break;
-						}
-					}
-				break;
-
-				case ignotum_pathname:
-					for(j=i; i<size; i++){
-						if(buf[i] == '\n'){
-							end = 1;
-							break;
-						}
-					}
-
-					ignotum_string_copy(&aux_string, &(buf[j]), i-j);
-
-					if(end){
-						aux = malloc(sizeof(ignotum_map_info_t));
-						tmp.pathname = aux_string.ptr;
-
-						memcpy(aux, &tmp, sizeof(ignotum_map_info_t));
-
-						*out = malloc(sizeof(ignotum_map_list_t));
-						(*out)->map = aux;
-						(*out)->next = NULL;
-						out = &((*out)->next);
-
-						parser_flags = ignotum_first_addr;
-						memset(&tmp, 0, sizeof(tmp));
-						memset(&aux_string, 0, sizeof(aux_string));
-						end = 0;
-						ret++;
-					}
-
-				break;
+				info = calloc(1, sizeof(ignotum_map_info_t));
+				flag = ignp_addr_start;
+				aux_len = 0;
+				ret++;
 			}
 		}
 	}
+
+	free(info);
 
 	close(maps_fd);
 
@@ -431,9 +466,8 @@ ssize_t ignotum_get_map_list(pid_t target_pid, ignotum_map_list_t **out){
 }
 
 ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
-	ignotum_map_info_t *ret = NULL;
-	int parser_flags = ignotum_first_addr;
-	int maps_fd, size, i, j, v = 0, end = 0;
+	int maps_fd, flag, i, size, aux_len;
+	ignotum_map_info_t *tmp, *ret = NULL;
 	char buf[1024];
 
 	if(pid)
@@ -446,145 +480,26 @@ ignotum_map_info_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
 	}
 
 
-	ignotum_map_info_t tmp;
-	ignotum_string_t aux_string;
+	tmp = calloc(1, sizeof(ignotum_map_info_t));
+	flag = ignp_addr_start;
+	aux_len = 0;
 
-	memset(&tmp, 0, sizeof(tmp));
-	memset(&aux_string, 0, sizeof(aux_string));
+	while((size = read(maps_fd, buf, sizeof(buf))) > 0){
+		for(i=0; i<size;){
+			parser(tmp, buf, &i, size, &flag, &aux_len);
+			if(flag == ignp_end){
+				if(tmp->start_addr <= addr && addr <= tmp->end_addr){
+					ret = tmp;
+					goto end;
+				}
 
-	while( (size = read(maps_fd, buf, sizeof(buf))) > 0 ){
-		for(i=0; i<size; i++){
-			char c = buf[i];
+				memset(tmp, 0x0, sizeof(ignotum_map_info_t));
+				flag = ignp_addr_start;
+				aux_len = 0;
 
-			switch(parser_flags){
-				case ignotum_first_addr:
-					if(c != '-'){
-						tmp.start_addr <<= 4;
-						tmp.start_addr += hexchar(c);
-					} else {
-						//printf("primeiro addr acabou ... %lx <= %lx ? %d\n", tmp.range.start_addr, addr, (tmp.range.start_addr <= addr));
-						//getchar();
-						if(tmp.start_addr <= addr){
-							parser_flags = ignotum_second_addr;
-						} else {
-							tmp.start_addr = 0;
-							parser_flags = ignotum_skip_line;
-						}
-					}
-				break;
-
-				case ignotum_second_addr:
-					if(c != ' '){
-						tmp.end_addr <<= 4;
-						tmp.end_addr += hexchar(c);
-					} else {
-						if(addr <= tmp.end_addr){
-							parser_flags = ignotum_flags;
-						} else {
-							tmp.start_addr = 0;
-							tmp.end_addr = 0;
-							parser_flags = ignotum_skip_line;
-						}
-					}
-				break;
-
-				case ignotum_flags:
-					if(c == '-')
-						v = 0;
-					else if(c == 'r')
-						v = ignotum_read;
-					else if(c == 'x')
-						v = ignotum_exec;
-					else if(c == 'w')
-						v = ignotum_write;
-					else if(c == 'p')
-						v = ignotum_private;
-					else if(c == 's')
-						v = ignotum_shared;
-					else if(c == ' '){
-						parser_flags = ignotum_offset;
-						break;
-					}
-
-					tmp.perms |= v;
-				break;
-
-				case ignotum_offset:
-					if(c != ' '){
-						tmp.offset <<= 4;
-						tmp.offset += hexchar(c);
-					} else {
-						parser_flags = ignotum_dev;
-					}
-				break;
-
-				case ignotum_dev:
-					if(c == ':'){
-						break;
-					}
-
-					else if(c == ' '){
-						parser_flags = ignotum_inode;
-					}
-
-					else {
-						tmp.st_dev <<= 4;
-						tmp.st_dev += hexchar(c);
-					}
-				break;
-
-				case ignotum_inode:
-					if(c != ' '){
-						tmp.st_ino *= 10;
-						tmp.st_ino += c-'0';
-					} else {
-						parser_flags = ignotum_skip_space;
-					}
-				break;
-
-				case ignotum_skip_space:
-					for(; i<size; i++){
-						if(buf[i] == '\n'){
-							ret = malloc(sizeof(ignotum_map_info_t));
-							memcpy(ret, &tmp, sizeof(ignotum_map_info_t));
-							goto end;
-
-						} else if(buf[i] != ' '){
-							i--;
-							parser_flags = ignotum_pathname;
-							break;
-						}
-					}
-				break;
-
-				case ignotum_pathname:
-					for(j=i; i<size; i++){
-						if(buf[i] == '\n'){
-							end = 1;
-							break;
-						}
-					}
-
-					ignotum_string_copy(&aux_string, &(buf[j]), i-j);
-
-					if(end){
-						ret = malloc(sizeof(ignotum_map_info_t));
-						memcpy(ret, &tmp, sizeof(ignotum_map_info_t));
-						ret->pathname = aux_string.ptr;
-						goto end;
-					}
-
-				break;
-
-				case ignotum_skip_line:
-					if(c == '\n'){
-						parser_flags = ignotum_first_addr;
-					}
-				break;
 			}
 		}
 	}
-
 
 
 	end:
