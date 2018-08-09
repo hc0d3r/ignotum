@@ -46,9 +46,9 @@ ssize_t ignotum_getmaplist(pid_t target_pid, ignotum_maplist_t **out){
         return ret;
 }
 
-ignotum_mapinfo_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
-    int maps_fd, flag, i, size, aux_len;
-    ignotum_mapinfo_t *tmp, *ret = NULL;
+int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
+    int maps_fd, flag, i, size, aux_len, ret = 1;
+    ignotum_mapinfo_t tmp;
     char buf[1024];
 
     if(pid)
@@ -60,24 +60,24 @@ ignotum_mapinfo_t *ignotum_getmapbyaddr(pid_t pid, off_t addr){
         goto open_fail;
     }
 
+    memset(&tmp, 0x0, sizeof(ignotum_mapinfo_t));
 
-    tmp = calloc(1, sizeof(ignotum_mapinfo_t));
     flag = ignp_addr_start;
     aux_len = 0;
 
     while((size = read(maps_fd, buf, sizeof(buf))) > 0){
         for(i=0; i<size;){
-            parser(tmp, buf, &i, size, &flag, &aux_len);
+            parser(&tmp, buf, &i, size, &flag, &aux_len);
             if(flag == ignp_end){
-                if(tmp->start_addr <= addr && addr <= tmp->end_addr){
-                    ret = tmp;
+                if(tmp.start_addr <= addr && addr <= tmp.end_addr){
+                    memcpy(out, &tmp, sizeof(ignotum_mapinfo_t));
+                    ret = 1;
                     goto end;
                 }
 
-                memset(tmp, 0x0, sizeof(ignotum_mapinfo_t));
+                memset(&tmp, 0x0, sizeof(ignotum_mapinfo_t));
                 flag = ignp_addr_start;
                 aux_len = 0;
-
             }
         }
     }
