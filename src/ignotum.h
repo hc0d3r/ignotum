@@ -10,12 +10,12 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-typedef struct ignotum_map_list {
-    struct ignotum_map_info *map;
-    struct ignotum_map_list *next;
+typedef struct ignotum_maplist {
+    size_t len;
+    struct ignotum_mapinfo *maps;
 } ignotum_maplist_t;
 
-typedef struct ignotum_map_info {
+typedef struct ignotum_mapinfo {
     off_t start_addr;
     off_t end_addr;
     int perms;
@@ -38,7 +38,7 @@ enum {
     ignotum_shared = 16
 };
 
-ssize_t ignotum_getmaplist(pid_t target_pid, ignotum_maplist_t **out);
+ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out);
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr);
 
 ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset);
@@ -49,7 +49,7 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
 
 size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
 
-void free_ignotum_maplist(ignotum_maplist_t **);
+void free_ignotum_maplist(ignotum_maplist_t *);
 void free_ignotum_mapinfo(ignotum_mapinfo_t *info);
 void free_ignotum_search(ignotum_search_t *);
 

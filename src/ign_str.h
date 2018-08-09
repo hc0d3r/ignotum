@@ -17,6 +17,6 @@ enum {
     ignp_end,
 };
 
-void parser(struct ignotum_map_info *out, const char *buf, int *i, int limit, int *flag, int *aux_len);
+void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int limit, int *flag, int *aux_len);
 
 #endif
