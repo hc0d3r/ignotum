@@ -7,7 +7,7 @@ static int hexchar(const char c){
         return c-'a'+10;
 }
 
-void parser(struct ignotum_map_info *out, const char *buf, int *i, int limit,
+__attribute__ ((visibility ("hidden"))) void parser(struct ignotum_map_info *out, const char *buf, int *i, int limit,
     int *flag, int *aux_len){
     int aux = *i;
     size_t len, tmp;
