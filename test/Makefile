@@ -2,7 +2,7 @@ CC?=gcc
 CFLAGS+=-Wall -Wextra -g -O2
 
 TEST_BIN=bin
-LDFLAGS+=-L../lib/ -lignotum
+LDFLAGS+=../lib/libignotum.a
 SRC_DIR=../src/
 
 .PHONY: all clean
