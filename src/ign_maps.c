@@ -75,6 +75,7 @@ int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
                     goto end;
                 }
 
+                free(tmp.pathname);
                 memset(&tmp, 0x0, sizeof(ignotum_mapinfo_t));
                 flag = ignp_addr_start;
                 aux_len = 0;
