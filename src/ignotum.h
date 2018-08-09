@@ -11,31 +11,31 @@
 #include <sys/types.h>
 
 typedef struct ignotum_map_list {
-	struct ignotum_map_info *map;
-	struct ignotum_map_list *next;
+    struct ignotum_map_info *map;
+    struct ignotum_map_list *next;
 } ignotum_maplist_t;
 
 typedef struct ignotum_map_info {
-	off_t start_addr;
-	off_t end_addr;
-	int perms;
-	off_t offset;
-	dev_t st_dev;
-	ino_t st_ino;
-	char *pathname;
+    off_t start_addr;
+    off_t end_addr;
+    int perms;
+    off_t offset;
+    dev_t st_dev;
+    ino_t st_ino;
+    char *pathname;
 } ignotum_mapinfo_t;
 
 typedef struct ignotum_search {
-	size_t len;
-	off_t *addrs;
+    size_t len;
+    off_t *addrs;
 } ignotum_search_t;
 
 enum {
-	ignotum_read = 1,
-	ignotum_exec = 2,
-	ignotum_write = 4,
-	ignotum_private = 8,
-	ignotum_shared = 16
+    ignotum_read = 1,
+    ignotum_exec = 2,
+    ignotum_write = 4,
+    ignotum_private = 8,
+    ignotum_shared = 16
 };
 
 ssize_t ignotum_getmaplist(pid_t target_pid, ignotum_maplist_t **out);
