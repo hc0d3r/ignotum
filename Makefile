@@ -56,7 +56,7 @@ clean-test:
 	$(MAKE) -C $(TEST_DIR) clean
 
 clean:
-	rm -f $(OBJ) $(SHARED_OBJ) $(STATIC_OBJ)
+	rm -f $(OBJS) $(SHARED_OBJ) $(STATIC_OBJ)
 
 clean-all: clean clean-test clean-doc
 
