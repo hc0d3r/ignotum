@@ -1,6 +1,6 @@
 #include "ign_maps.h"
 
-ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
+ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list){
     int maps_fd, flag, i, size, aux_len;
     ignotum_mapinfo_t info;
     ssize_t ret = -1;
@@ -9,8 +9,8 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
 
     size_t init_alloc = 24;
 
-    out->len = 0;
-    out->maps = NULL;
+    list->len = 0;
+    list->maps = NULL;
 
     if(pid)
         sprintf(buf, "/proc/%d/maps", pid);
@@ -21,8 +21,8 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
         goto end;
     }
 
-    out->maps = malloc(init_alloc*sizeof(ignotum_mapinfo_t));
-    if(out->maps == NULL)
+    list->maps = malloc(init_alloc*sizeof(ignotum_mapinfo_t));
+    if(list->maps == NULL)
         goto alloc_error;
 
     memset(&info, 0, sizeof(ignotum_mapinfo_t));
@@ -33,19 +33,19 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
         for(i=0; i<size;){
             parser(&info, buf, &i, size, &flag, &aux_len);
             if(flag == ignp_end){
-                if(out->len == init_alloc){
+                if(list->len == init_alloc){
                     init_alloc += 24;
-                    tmp = realloc(out->maps, sizeof(ignotum_mapinfo_t)*(init_alloc));
+                    tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(init_alloc));
                     if(tmp == NULL){
                         free(info.pathname);
                         goto alloc_error;
                     }
-                    out->maps = tmp;
+                    list->maps = tmp;
                 }
 
-                memcpy(&(out->maps[out->len]), &info, sizeof(ignotum_mapinfo_t));
+                memcpy(&(list->maps[list->len]), &info, sizeof(ignotum_mapinfo_t));
                 memset(&info, 0, sizeof(ignotum_mapinfo_t));
-                out->len++;
+                list->len++;
 
                 flag = ignp_addr_start;
                 aux_len = 0;
@@ -53,15 +53,15 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
         }
     }
 
-    if(out->len < init_alloc){
+    if(list->len < init_alloc){
         // try dealloc memory, if fails ignore
-        tmp = realloc(out->maps, sizeof(ignotum_mapinfo_t)*(out->len));
+        tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(list->len));
         if(tmp != NULL){
-            out->maps = tmp;
+            list->maps = tmp;
         }
     }
 
-    ret = out->len;
+    ret = list->len;
 
     alloc_error:
         close(maps_fd);
