@@ -1,6 +1,6 @@
 #include "ign_mem.h"
 
-ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset){
+ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr){
     char pathbuf[32], *filename;
     ssize_t ret = -1;
 
@@ -16,14 +16,14 @@ ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset){
         goto end;
     }
 
-    ret = pwrite(fd, src, n, offset);
+    ret = pwrite(fd, buf, n, addr);
     close(fd);
 
     end:
         return ret;
 }
 
-ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset){
+ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr){
     char pathbuf[32], *filename;
     ssize_t ret = -1;
 
@@ -39,7 +39,7 @@ ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset){
         goto end;
     }
 
-    ret = pread(fd, out, n, offset);
+    ret = pread(fd, buf, n, addr);
     close(fd);
 
     end:

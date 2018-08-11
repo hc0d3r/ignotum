@@ -28,7 +28,7 @@ int main(void){
     }
 
     waitpid(pid, NULL, 0);
-    size_t ret = ignotum_ptrace_write(pid, "Yes, i can", (long)change_me, 11);
+    size_t ret = ignotum_ptrace_write(pid, "Yes, i can", 11, (off_t)change_me);
     ptrace(PTRACE_CONT, pid, 0L, 0L);
     waitpid(pid, NULL, 0);
 

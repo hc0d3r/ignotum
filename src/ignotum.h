@@ -42,11 +42,11 @@ typedef struct ignotum_search {
 ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out);
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr);
 
-ssize_t ignotum_mem_write(pid_t pid, const void *src, size_t n, off_t offset);
-ssize_t ignotum_mem_read(pid_t pid, void *out, size_t n, off_t offset);
+ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr);
+ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr);
 
-size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n);
-size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n);
+size_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr);
+size_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr);
 
 size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen);
 

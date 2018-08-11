@@ -1,6 +1,6 @@
 #include "ign_ptrace.h"
 
-size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
+size_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr){
     long aligned_addr, old_bytes, new_bytes;
     size_t offset, ret = 0, aux;
     unsigned long bitmask;
@@ -16,7 +16,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
         aux = n;
 
     if(aux == wordsize){
-        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)data);
+        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)buf);
         if(errno)
             goto end;
     } else {
@@ -37,7 +37,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
 
         old_bytes &= bitmask;
 
-        memcpy(((char *)(&new_bytes)+offset), data, aux);
+        memcpy(((char *)(&new_bytes)+offset), buf, aux);
         new_bytes |= old_bytes;
 
         ptrace(PTRACE_POKEDATA, pid, aligned_addr, new_bytes);
@@ -58,7 +58,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
                 goto end;
 
             new_bytes = 0;
-            memcpy(&new_bytes, data+ret, aux);
+            memcpy(&new_bytes, buf+ret, aux);
 
             old_bytes &= -1UL << (aux * 8);
             new_bytes |= old_bytes;
@@ -72,7 +72,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
             break;
         }
 
-        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)(data+ret));
+        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)(buf+ret));
         if(errno)
             goto end;
 
@@ -84,7 +84,7 @@ size_t ignotum_ptrace_write(pid_t pid, const void *data, long addr, size_t n){
 }
 
 
-size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
+size_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr){
     long aligned_addr, bytes;
     size_t offset, ret = 0;
 
@@ -99,7 +99,7 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
     if(ret > n)
         ret = n;
 
-    memcpy(output, ((char *)(&bytes)+offset), ret);
+    memcpy(buf, ((char *)(&bytes)+offset), ret);
     aligned_addr += wordsize;
 
 
@@ -110,12 +110,12 @@ size_t ignotum_ptrace_read(pid_t pid, void *output, long addr, size_t n){
 
         if((ret+wordsize) > n){
             size_t tmp = n-ret;
-            memcpy(output+ret, &bytes, tmp);
+            memcpy(buf+ret, &bytes, tmp);
             ret += tmp;
             break;
         }
 
-        *(long *)(output+ret) = bytes;
+        *(long *)(buf+ret) = bytes;
 
         ret += wordsize;
         aligned_addr += wordsize;
