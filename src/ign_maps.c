@@ -71,7 +71,7 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out){
 }
 
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
-    int maps_fd, flag, i, size, aux_len, ret = 1;
+    int maps_fd, flag, i, size, aux_len, ret = 0;
     ignotum_mapinfo_t tmp;
     char buf[1024];
 
