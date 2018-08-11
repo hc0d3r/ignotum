@@ -53,7 +53,7 @@ ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list){
         }
     }
 
-    if(list->len < init_alloc){
+    if(list->len && (list->len < init_alloc)){
         // try dealloc memory, if fails ignore
         tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(list->len));
         if(tmp != NULL){
