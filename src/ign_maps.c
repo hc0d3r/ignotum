@@ -124,8 +124,3 @@ void free_ignotum_maplist(ignotum_maplist_t *list){
     list->maps = NULL;
     list->len = 0;
 }
-
-void free_ignotum_mapinfo(ignotum_mapinfo_t *info){
-    free(info->pathname);
-    free(info);
-}
