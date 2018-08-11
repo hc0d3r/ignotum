@@ -18,7 +18,16 @@ typedef struct ignotum_maplist {
 typedef struct ignotum_mapinfo {
     off_t start_addr;
     off_t end_addr;
-    int perms;
+    union {
+        struct {
+            unsigned char is_x:1;
+            unsigned char is_w:1;
+            unsigned char is_r:1;
+            unsigned char is_p:1;
+            unsigned char is_s:1;
+        };
+        int perms;
+    };
     off_t offset;
     dev_t st_dev;
     ino_t st_ino;
@@ -29,14 +38,6 @@ typedef struct ignotum_search {
     size_t len;
     off_t *addrs;
 } ignotum_search_t;
-
-enum {
-    ignotum_read = 1,
-    ignotum_exec = 2,
-    ignotum_write = 4,
-    ignotum_private = 8,
-    ignotum_shared = 16
-};
 
 ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *out);
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr);

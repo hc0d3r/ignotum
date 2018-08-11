@@ -50,8 +50,19 @@ __attribute__ ((visibility ("hidden"))) void parser(struct ignotum_mapinfo *out,
                         break;
                     }
 
+
+                    if(c == 'p'){
+                        out->is_p = 1;
+                        continue;
+                    } else if(c == 's'){
+                        out->is_s = 1;
+                        continue;
+                    }
+
                     out->perms <<= 1;
-                    if(c != '-' && c != 's'){
+
+                    // r - 4 | w - 2 | x - 1
+                    if(c != '-'){
                         out->perms |= 1;
                     }
                 }
