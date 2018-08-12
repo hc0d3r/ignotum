@@ -93,7 +93,7 @@ int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
         for(i=0; i<size;){
             parser(&tmp, buf, &i, size, &flag, &aux_len);
             if(flag == ignp_end){
-                if(tmp.start_addr <= addr && addr <= tmp.end_addr){
+                if(addr >= tmp.start_addr && tmp.end_addr > addr){
                     memcpy(out, &tmp, sizeof(ignotum_mapinfo_t));
                     ret = 1;
                     goto end;

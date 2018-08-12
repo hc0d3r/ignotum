@@ -22,6 +22,7 @@ int main(void){
         printf("main function permissions: read: %c, write: %c, exec: %c\n",
             (map.is_r ? 'y' : 'n'), (map.is_w ? 'y' : 'n'), (map.is_x ? 'y' : 'n')
         );
+        free(map.pathname);
     }
 
     return 0;
