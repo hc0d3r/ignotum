@@ -1,4 +1,7 @@
-#include "ign_search.h"
+#include <stdlib.h>
+
+#include "ignotum.h"
+
 
 size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen){
     size_t i, j, k, diff, ret = 0;

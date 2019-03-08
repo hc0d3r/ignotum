@@ -1,4 +1,8 @@
-#include "ign_mem.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include "ignotum.h"
 
 ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr){
     char pathbuf[32], *filename;

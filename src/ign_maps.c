@@ -1,4 +1,10 @@
-#include "ign_maps.h"
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include "ignotum.h"
+#include "ign_str.h"
 
 ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list){
     int maps_fd, flag, i, size, aux_len;

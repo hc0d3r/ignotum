@@ -1,4 +1,10 @@
-#include "ign_ptrace.h"
+#include <sys/ptrace.h>
+#include <string.h>
+#include <errno.h>
+
+#include "ignotum.h"
+
+#define wordsize sizeof(long)
 
 size_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr){
     long aligned_addr, old_bytes, new_bytes;
