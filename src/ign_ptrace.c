@@ -137,7 +137,7 @@ ssize_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr){
     if(!nread){
         ret = -1;
     } else {
-        ret = (size_t)nread;
+        ret = (ssize_t)nread;
     }
 
 
