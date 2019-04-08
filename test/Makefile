@@ -1,5 +1,4 @@
-CC?=gcc
-CFLAGS+=-Wall -Wextra -g -O2
+CFLAGS+=-Wall -Wextra -O2
 
 TEST_BIN=bin
 LDFLAGS+=../lib/libignotum.a
