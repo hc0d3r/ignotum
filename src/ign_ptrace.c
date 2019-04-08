@@ -90,43 +90,57 @@ size_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr){
 }
 
 
-size_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr){
-    long aligned_addr, bytes;
-    size_t offset, ret = 0;
+ssize_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr){
+    ssize_t ret;
+    size_t nread = 0, pos = 0, len;
 
-    aligned_addr = addr & (long)(-wordsize);
-    offset = addr - aligned_addr;
+    long aligned, offset, bytes;
 
-    bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
-    if(errno)
+    if(n == 0){
+        ret = 0;
         goto end;
-
-    ret = wordsize-offset;
-    if(ret > n)
-        ret = n;
-
-    memcpy(buf, ((char *)(&bytes)+offset), ret);
-    aligned_addr += wordsize;
-
-
-    while(ret < n){
-        bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
-        if(errno)
-            goto end;
-
-        if((ret+wordsize) > n){
-            size_t tmp = n-ret;
-            memcpy(buf+ret, &bytes, tmp);
-            ret += tmp;
-            break;
-        }
-
-        *(long *)(buf+ret) = bytes;
-
-        ret += wordsize;
-        aligned_addr += wordsize;
     }
 
+    if(addr & (wordsize-1)){
+        aligned = addr & (long)(-wordsize);
+        offset = addr - aligned;
+        len = wordsize-offset;
+        addr = aligned;
+    } else {
+        len = wordsize;
+        offset = 0;
+    }
+
+    while(nread<n){
+        bytes = ptrace(PTRACE_PEEKDATA, pid, addr, 0L);
+        if(errno)
+            break;
+
+        nread += len;
+        if(nread > n){
+            len = n-(nread-len);
+            nread = n;
+        }
+
+        if(len == wordsize){
+            *(long *)(buf+pos) = bytes;
+        } else {
+            memcpy((char *)buf+pos, (char *)&bytes+offset, len);
+            len = wordsize;
+            offset = 0;
+        }
+
+        pos = nread;
+        addr += wordsize;
+    }
+
+    if(!nread){
+        ret = -1;
+    } else {
+        ret = (size_t)nread;
+    }
+
+
     end:
-        return ret;
+    return ret;
 }

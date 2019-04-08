@@ -27,11 +27,11 @@ int main(void){
     }
 
     waitpid(pid, NULL, 0);
-    size_t ret = ignotum_ptrace_read(pid, nops, 10, (off_t)read_my_nops);
+    ssize_t ret = ignotum_ptrace_read(pid, nops, 10, (off_t)read_my_nops);
     ptrace(PTRACE_CONT, pid, 0L, 0L);
     waitpid(pid, NULL, 0);
 
-    printf("bytes read: %zu\n", ret);
+    printf("bytes read: %zd\n", ret);
     for(i=0; i<10; i++){
         printf("%x ", nops[i]);
     }
