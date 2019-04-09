@@ -28,11 +28,11 @@ int main(void){
     }
 
     waitpid(pid, NULL, 0);
-    size_t ret = ignotum_ptrace_write(pid, "Yes, i can", 11, (off_t)change_me);
+    ssize_t ret = ignotum_ptrace_write(pid, "Yes, I can!", 11, (off_t)change_me);
     ptrace(PTRACE_CONT, pid, 0L, 0L);
     waitpid(pid, NULL, 0);
 
-    printf("bytes written: %zu\n", ret);
+    printf("bytes written: %zd\n", ret);
 
     return 0;
 

@@ -6,89 +6,65 @@
 
 #define wordsize sizeof(long)
 
-size_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr){
-    long aligned_addr, old_bytes, new_bytes;
-    size_t offset, ret = 0, aux;
-    unsigned long bitmask;
+ssize_t ignotum_ptrace_write(pid_t pid, const void *buf, size_t n, long addr){
+    ssize_t ret;
+    size_t nwrite = 0, pos = 0, len;
 
-    if(!n)
+    long aligned, offset, bytes;
+
+    if(n == 0){
+        ret = 0;
         goto end;
+    }
 
-    aligned_addr = addr & (long)(-wordsize);
-    offset = addr - aligned_addr;
-
-    aux = wordsize-offset;
-    if(aux > n)
-        aux = n;
-
-    if(aux == wordsize){
-        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)buf);
-        if(errno)
-            goto end;
+    if(addr & (wordsize-1)){
+        aligned = addr & (long)(-wordsize);
+        offset = addr - aligned;
+        len = wordsize-offset;
+        addr = aligned;
     } else {
-        old_bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
-        if(errno)
-            goto end;
-
-        new_bytes = 0;
-
-        if(!offset)
-            bitmask = 0;
-        else
-            bitmask = -1UL >> (wordsize-offset)*8;
-
-        if((aux+offset) < wordsize){
-            bitmask |= (~bitmask) << (aux * 8);
-        }
-
-        old_bytes &= bitmask;
-
-        memcpy(((char *)(&new_bytes)+offset), buf, aux);
-        new_bytes |= old_bytes;
-
-        ptrace(PTRACE_POKEDATA, pid, aligned_addr, new_bytes);
-        if(errno)
-            goto end;
+        len = wordsize;
+        offset = 0;
     }
 
-    ret = aux;
+    while(nwrite<n){
+        nwrite += len;
+        if(nwrite > n){
+            len = n-(nwrite-len);
+            nwrite = n;
+        }
 
-    while(ret < n){
-        aligned_addr += wordsize;
-
-        if((ret+wordsize) > n){
-            aux = n-ret;
-
-            old_bytes = ptrace(PTRACE_PEEKDATA, pid, aligned_addr, 0L);
+        if(len != wordsize){
+            bytes = ptrace(PTRACE_PEEKDATA, pid, addr, 0L);
             if(errno)
-                goto end;
+                break;
 
-            new_bytes = 0;
-            memcpy(&new_bytes, buf+ret, aux);
+            memcpy((char *)&bytes+offset, (char *)buf+pos, len);
+            len = wordsize;
+            offset = 0;
+        } else {
+            bytes = *(long *)((char *)buf+pos);
+        }
 
-            old_bytes &= -1UL << (aux * 8);
-            new_bytes |= old_bytes;
 
-            ptrace(PTRACE_POKEDATA, pid, aligned_addr, new_bytes);
-            if(errno)
-                goto end;
-
-            ret += aux;
-
+        ptrace(PTRACE_POKEDATA, pid, addr, bytes);
+        if(errno)
             break;
-        }
 
-        ptrace(PTRACE_POKEDATA, pid, aligned_addr, *(long *)(buf+ret));
-        if(errno)
-            goto end;
-
-        ret += wordsize;
+        pos = nwrite;
+        addr += wordsize;
     }
+
+    if(!pos){
+        ret = -1;
+    } else {
+        ret = (ssize_t)pos;
+    }
+
 
     end:
-        return ret;
+    return ret;
 }
-
 
 ssize_t ignotum_ptrace_read(pid_t pid, void *buf, size_t n, long addr){
     ssize_t ret;
