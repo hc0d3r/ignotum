@@ -36,7 +36,7 @@ $(OBJDIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
 
 $(STATIC_OBJ): $(OBJS)
-	ar -cvru $(STATIC_OBJ) $(OBJS)
+	ar -cvr $(STATIC_OBJ) $(OBJS)
 
 $(SHARED_OBJ): $(OBJS)
 	$(CC) -shared -o  $(SHARED_OBJ) $(OBJS) $(CFLAGS)
