@@ -6,7 +6,7 @@
 
 ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr){
     char pathbuf[32], *filename;
-    ssize_t ret = -1;
+    ssize_t ret;
 
     if(!pid){
         filename = "/proc/self/mem";
@@ -17,6 +17,7 @@ ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr){
 
     int fd = open(filename, O_WRONLY);
     if(fd == -1){
+        ret = -1;
         goto end;
     }
 
@@ -24,12 +25,12 @@ ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr){
     close(fd);
 
     end:
-        return ret;
+    return ret;
 }
 
 ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr){
     char pathbuf[32], *filename;
-    ssize_t ret = -1;
+    ssize_t ret;
 
     if(!pid){
         filename = "/proc/self/mem";
@@ -40,6 +41,7 @@ ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr){
 
     int fd = open(filename, O_RDONLY);
     if(fd == -1){
+        ret = -1;
         goto end;
     }
 
@@ -47,5 +49,5 @@ ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr){
     close(fd);
 
     end:
-        return ret;
+    return ret;
 }
