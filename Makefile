@@ -33,7 +33,7 @@ all: $(SHARED_OBJ) $(STATIC_OBJ)
 
 #$(OBJ): $(SRC_DIR)/ignotum.c
 $(OBJDIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
+	$(CC) $(CFLAGS) $(LDFLAGS) -fPIC -c -o $@ $< -I.
 
 $(STATIC_OBJ): $(OBJS)
 	ar -cvr $(STATIC_OBJ) $(OBJS)
