@@ -39,7 +39,7 @@ typedef struct ignotum_search {
     off_t *addrs;
 } ignotum_search_t;
 
-ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list);
+ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid);
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr);
 
 ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr);

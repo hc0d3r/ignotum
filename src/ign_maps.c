@@ -6,7 +6,7 @@
 #include "ignotum.h"
 #include "ign_str.c"
 
-ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list){
+ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     int maps_fd, flag, i, size, aux_len;
     ignotum_mapinfo_t info;
     ssize_t ret = -1;
