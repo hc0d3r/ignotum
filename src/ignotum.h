@@ -2,7 +2,7 @@
 #define _IGNOTUM_H 1
 
 /* information macros */
-#define IGNOTUM_VERSION "0.1"
+#define IGNOTUM_VERSION "0.2"
 
 /* initialization macros */
 #define DEFAULT_IGNOTUM_MEMSEARCH (struct ignotum_search){ 0, NULL }

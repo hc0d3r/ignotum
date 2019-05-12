@@ -6,7 +6,7 @@ OBJS =		$(OBJDIR)/ign_mem.o \
 		$(OBJDIR)/ign_maps.o \
 		$(OBJDIR)/ign_search.o
 
-VERSION=0.1
+VERSION=0.2
 
 SHARED_OBJ=libignotum.so.$(VERSION)
 STATIC_OBJ=libignotum.a
