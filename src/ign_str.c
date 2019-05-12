@@ -1,4 +1,18 @@
-#include "ign_str.h"
+#include "ignotum.h"
+#include <stdlib.h>
+#include <string.h>
+
+enum {
+    ignp_addr_start,
+    ignp_addr_end,
+    ignp_flags,
+    ignp_offset,
+    ignp_dev,
+    ignp_ino,
+    ignp_skip,
+    ignp_pathname,
+    ignp_end,
+};
 
 static int hexchar(const char c){
     if(c <= '9')
@@ -7,7 +21,7 @@ static int hexchar(const char c){
         return c-'a'+10;
 }
 
-__attribute__ ((visibility ("hidden"))) void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int limit,
+static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int limit,
     int *flag, int *aux_len){
     int aux = *i;
     size_t len, tmp;

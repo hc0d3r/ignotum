@@ -4,7 +4,7 @@
 #include <fcntl.h>
 
 #include "ignotum.h"
-#include "ign_str.h"
+#include "ign_str.c"
 
 ssize_t ignotum_getmaplist(pid_t pid, ignotum_maplist_t *list){
     int maps_fd, flag, i, size, aux_len;

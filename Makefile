@@ -5,7 +5,6 @@ OBJDIR = lib
 
 OBJS =		$(OBJDIR)/ign_mem.o \
 			$(OBJDIR)/ign_ptrace.o \
-			$(OBJDIR)/ign_str.o \
 			$(OBJDIR)/ign_maps.o \
 			$(OBJDIR)/ign_search.o
 
@@ -40,6 +39,9 @@ $(STATIC_OBJ): $(OBJS)
 
 $(SHARED_OBJ): $(OBJS)
 	$(CC) -shared -o  $(SHARED_OBJ) $(OBJS) $(CFLAGS)
+
+$(OBJDIR)/ign_maps.o: $(SRC_DIR)/ign_maps.c $(SRC_DIR)/ign_str.c
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
 
 install: all
 	$(INSTALLPROG) $(SHARED_OBJ) $(INSTALL_LIB_DIR)/libignotum.so
