@@ -1,55 +1,50 @@
-CC?=gcc
-CFLAGS+=-Wall -Wextra -O2
+override CFLAGS+=-Wall -Wextra -O2
 
-OBJDIR = lib
-
+OBJDIR=lib
 OBJS =		$(OBJDIR)/ign_mem.o \
-			$(OBJDIR)/ign_ptrace.o \
-			$(OBJDIR)/ign_maps.o \
-			$(OBJDIR)/ign_search.o
+		$(OBJDIR)/ign_ptrace.o \
+		$(OBJDIR)/ign_maps.o \
+		$(OBJDIR)/ign_search.o
 
-#OBJ=./lib/ignotum.o
-SHARED_OBJ=./lib/libignotum.so
-STATIC_OBJ=./lib/libignotum.a
+SHARED_OBJ=lib/libignotum.so.0.1
+STATIC_OBJ=lib/libignotum.a
 
 INSTALLPROG=/usr/bin/install
-INSTALL_LIB_DIR?=/usr/lib64
-INSTALL_HEADER_DIR?=/usr/include
+PREFIX?=/usr
 
 DOC_DIR=doc
 MAN_PAGES=$(shell find $(DOC_DIR) -type f -name '*.3')
 GZIP_PAGES=$(MAN_PAGES:%=%.gz)
-MAN_PAGES_DIR=/usr/share/man
-
+MAN_PAGES_DIR=$(PREFIX)/share/man
 
 SRC_DIR = src
 TEST_DIR = test
 
-
 .PHONY: all install uninstall test
 
-all: $(SHARED_OBJ) $(STATIC_OBJ)
+all: $(SHARED_OBJ) lib/libignotum.so $(STATIC_OBJ)
 
-#$(OBJ): $(SRC_DIR)/ignotum.c
 $(OBJDIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -fPIC -c -o $@ $< -I.
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
 
 $(STATIC_OBJ): $(OBJS)
 	ar -cvr $(STATIC_OBJ) $(OBJS)
 
-$(SHARED_OBJ): $(OBJS)
-	$(CC) -shared -o  $(SHARED_OBJ) $(OBJS) $(CFLAGS)
+lib/libignotum.so: $(SHARED_OBJ)
+	ln -sf libignotum.so.0.1 lib/libignotum.so
 
-$(OBJDIR)/ign_maps.o: $(SRC_DIR)/ign_maps.c $(SRC_DIR)/ign_str.c
-	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
+$(SHARED_OBJ): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libignotum.so.0.1 -o $(SHARED_OBJ) $(OBJS)
 
 install: all
-	$(INSTALLPROG) $(SHARED_OBJ) $(INSTALL_LIB_DIR)/libignotum.so
-	$(INSTALLPROG) $(STATIC_OBJ) $(INSTALL_LIB_DIR)/libignotum.a
-	$(INSTALLPROG) src/ignotum.h $(INSTALL_HEADER_DIR)/ignotum.h
+	$(INSTALLPROG) $(SHARED_OBJ) $(PREFIX)/lib
+	$(INSTALLPROG) $(STATIC_OBJ) $(PREFIX)/lib
+	$(INSTALLPROG) lib/libignotum.so $(PREFIX)/lib
+	$(INSTALLPROG) src/ignotum.h $(PREFIX)/include/ignotum.h
 
 uninstall:
-	-rm -f $(INSTALL_LIB_DIR)/libignotum.so $(INSTALL_LIB_DIR)/libignotum.a $(INSTALL_HEADER_DIR)/ignotum.h
+	-rm -f $(PREFIX)/lib/libignotum.so \
+	$(PREFIX)/lib/libignotum.a $(PREFIX)/include/ignotum.h
 
 test: all
 	$(MAKE) -C $(TEST_DIR)
@@ -58,7 +53,7 @@ clean-test:
 	$(MAKE) -C $(TEST_DIR) clean
 
 clean:
-	rm -f $(OBJS) $(SHARED_OBJ) $(STATIC_OBJ)
+	rm -f $(OBJS) $(SHARED_OBJ) $(STATIC_OBJ) lib/libignotum.so
 
 clean-all: clean clean-test clean-doc
 
