@@ -16,7 +16,7 @@ int main(void){
 
     printf("char test[] = %p\n", test);
 
-    if(ignotum_getmaplist(0, &addrs) > 0){
+    if(ignotum_getmaplist(&addrs, 0) > 0){
         for(i=0; i<addrs.len; i++){
             if(addrs.maps[i].pathname == NULL)
                 continue;
