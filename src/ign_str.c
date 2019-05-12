@@ -16,9 +16,9 @@ enum {
 
 static int hexchar(char c){
     if(c >= '0' && c <= '9')
-        c-'0';
+        c = c-'0';
     else
-        c-'a'+10;
+        c = c-'a'+10;
 
     return c;
 }
