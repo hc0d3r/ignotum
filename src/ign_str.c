@@ -14,11 +14,13 @@ enum {
     ignp_end,
 };
 
-static int hexchar(const char c){
-    if(c <= '9')
-        return c-'0';
+static int hexchar(char c){
+    if(c >= '0' && c <= '9')
+        c-'0';
     else
-        return c-'a'+10;
+        c-'a'+10;
+
+    return c;
 }
 
 static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int limit,
