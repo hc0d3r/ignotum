@@ -6,8 +6,10 @@ OBJS =		$(OBJDIR)/ign_mem.o \
 		$(OBJDIR)/ign_maps.o \
 		$(OBJDIR)/ign_search.o
 
-SHARED_OBJ=lib/libignotum.so.0.1
-STATIC_OBJ=lib/libignotum.a
+VERSION=0.1
+
+SHARED_OBJ=libignotum.so.$(VERSION)
+STATIC_OBJ=libignotum.a
 
 INSTALLPROG=/usr/bin/install
 PREFIX?=/usr
@@ -22,28 +24,28 @@ TEST_DIR = test
 
 .PHONY: all install uninstall test
 
-all: $(SHARED_OBJ) lib/libignotum.so $(STATIC_OBJ)
+all: lib/$(SHARED_OBJ) lib/$(STATIC_OBJ) lib/libignotum.so
 
 $(OBJDIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $< -I.
 
-$(STATIC_OBJ): $(OBJS)
-	ar -cvr $(STATIC_OBJ) $(OBJS)
+lib/$(STATIC_OBJ): $(OBJS)
+	ar -cvr $@ $^
 
-lib/libignotum.so: $(SHARED_OBJ)
-	ln -sf libignotum.so.0.1 lib/libignotum.so
+lib/libignotum.so: lib/$(SHARED_OBJ)
+	ln -sf $(SHARED_OBJ) $@
 
-$(SHARED_OBJ): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,libignotum.so.0.1 -o $(SHARED_OBJ) $(OBJS)
+lib/$(SHARED_OBJ): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,$(SHARED_OBJ) -o lib/$(SHARED_OBJ) $(OBJS)
 
 install: all
-	$(INSTALLPROG) $(SHARED_OBJ) $(PREFIX)/lib
-	$(INSTALLPROG) $(STATIC_OBJ) $(PREFIX)/lib
+	$(INSTALLPROG) lib/$(SHARED_OBJ) $(PREFIX)/lib
+	$(INSTALLPROG) lib/$(STATIC_OBJ) $(PREFIX)/lib
 	$(INSTALLPROG) lib/libignotum.so $(PREFIX)/lib
 	$(INSTALLPROG) src/ignotum.h $(PREFIX)/include/ignotum.h
 
 uninstall:
-	-rm -f $(PREFIX)/lib/libignotum.so \
+	-rm -f $(PREFIX)/lib/$(SHARED_OBJ) $(PREFIX)/lib/libignotum.so \
 	$(PREFIX)/lib/libignotum.a $(PREFIX)/include/ignotum.h
 
 test: all
@@ -53,7 +55,7 @@ clean-test:
 	$(MAKE) -C $(TEST_DIR) clean
 
 clean:
-	rm -f $(OBJS) $(SHARED_OBJ) $(STATIC_OBJ) lib/libignotum.so
+	rm -f $(OBJS) lib/$(STATIC_OBJ) lib/libignotum.so*
 
 clean-all: clean clean-test clean-doc
 
