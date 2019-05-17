@@ -1,0 +1,44 @@
+.TH ignotum_ptrace_read 3 2019 "Library" "libignotum man page"
+.SH NAME
+ignotum_ptrace_read, ignotum_ptrace_write \- read from or write to a ptraced pid at the given address
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "ssize_t ignotum_ptrace_read(pid_t " pid ", void *" buf ", size_t " n ", long " addr );
+.PP
+.BI "ssize_t ignotum_ptrace_write(pid_t " pid ", const void *" buf ", size_t " n ", long " addr );
+.SH DESCRIPTION
+.BR ignotum_mem_read()
+reads up to
+.I n
+bytes from specific
+.I pid
+at address given at
+.I addr
+into the buffer starting at
+\fIbuf\fP.
+.PP
+.BR ignotum_mem_write ()
+writes up to
+.I n
+bytes from the buffer starting at
+.I buf
+to the specific
+.I pid
+at address
+\fIaddr\fP.
+.PP
+The
+.I pid
+equal to 0 means that is the running pid.
+.SH RETURN
+On success, return the number of bytes read (ignotum_ptrace_read) or written (ignotum_ptrace_write).
+If the return is less than
+.I n
+bytes you can check
+.I errno
+to get the cause of the error.
+.SH SEE ALSO
+.BR ignotum_mem_read (3),
+.BR ignotum_mem_write (3),
+.BR ptrace(2)
