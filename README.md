@@ -30,7 +30,7 @@ make [target] [options]
 | CFLAGS  | set compiler flags                                    |
 | LDFLAGS | set linker flags                                      |
 
-## Example
+## Examples
 
 **Compiling and install**
 
@@ -39,10 +39,18 @@ $ make all
 $ sudo make install PREFIX=/mypath
 ```
 
-**Removing**
+**Linking**
 
 ```
-sudo make uninstall PREFIX=/mypath
+$ gcc mysource.c -lignotum -o dynamic-linked
+$ gcc mysource.c -l:libignotum.a -o static-linked
+```
+
+
+**Remove**
+
+```
+$ sudo make uninstall PREFIX=/mypath
 ```
 
 # Avaliable functions:
