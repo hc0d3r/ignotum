@@ -1,0 +1,64 @@
+.TH ignotum_getmapbyaddr 3 2018-08-12 "Library" "libignotum man page"
+.SH NAME
+ignotum_getmapbyaddr \- get the memory map by address for the given pid
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "int ignotum_getmapbyaddr(ignotum_mapinfo_t *" out ", pid_t " pid ", off_t " addr );
+.SH DESCRIPTION
+.BR ignotum_getmapbyaddr ()
+opens /proc/[\fIpid\fP]/maps or /proc/self/maps, if
+.I pid
+is equal to 0, look for the memory map of the given
+.I addr
+and fill
+.I out
+with this information.
+.PP
+The
+.I ignotum_mapinfo_t
+is defined in
+.I <ignotum.h>
+as follows:
+.PP
+.in +4n
+.EX
+typedef struct ignotum_mapinfo {
+    off_t start_addr;
+    off_t end_addr;
+    union {
+	struct {
+            unsigned char is_x:1;
+            unsigned char is_w:1;
+            unsigned char is_r:1;
+            unsigned char is_p:1;
+            unsigned char is_s:1;
+        };
+	int perms;
+    };
+    off_t offset;
+    dev_t st_dev;
+    ino_t st_ino;
+    char *pathname;
+} ignotum_mapinfo_t;
+.EE
+.in
+.PP
+information about the members of
+.I ignotum_mapinfo_t
+can be found in
+.BR proc (5),
+specifically in /proc/[\fIpid\fP]/maps subsection.
+.SH RETURN
+.BR ignotum_getmapbyaddr ()
+returns 1 if it succeeds. On error returns 0, if
+.I errno
+is not set this means that map for the given
+.I addr
+has not found.
+.SH NOTES
+.I out
+argument will be filled only if the memory map has been found.
+.SH SEE ALSO
+.BR ignotum_getmapbyaddr (3),
+.BR proc (5)
