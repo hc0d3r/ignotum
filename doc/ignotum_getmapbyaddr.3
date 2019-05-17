@@ -21,20 +21,19 @@ is defined in
 .I <ignotum.h>
 as follows:
 .PP
-.in +4n
 .EX
 typedef struct ignotum_mapinfo {
     off_t start_addr;
     off_t end_addr;
     union {
-	struct {
+        struct {
             unsigned char is_x:1;
             unsigned char is_w:1;
             unsigned char is_r:1;
             unsigned char is_p:1;
             unsigned char is_s:1;
         };
-	int perms;
+        int perms;
     };
     off_t offset;
     dev_t st_dev;
@@ -42,7 +41,6 @@ typedef struct ignotum_mapinfo {
     char *pathname;
 } ignotum_mapinfo_t;
 .EE
-.in
 .PP
 information about the members of
 .I ignotum_mapinfo_t
