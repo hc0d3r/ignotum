@@ -1,0 +1,151 @@
+.TH ignotum_getmaplist 3 2019 "Library" "libignotum man page"
+.SH NAME
+ignotum_getmaplist \- get the memory map list for the given pid
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "ssize_t ignotum_getmaplist(ignotum_maplist_t *" list ", pid_t " pid );
+.PP
+.BI "void free_ignotum_maplist(ignotum_maplist_t *" list );
+.SH DESCRIPTION
+.BR ignotum_getmaplist ()
+opens /proc/[\fIpid\fP]/maps or /proc/self/maps, if
+.I pid
+is equal to 0, and fill the
+.I list
+with a list of mapped memory regions.
+.PP
+the
+.I list
+argument always will be initialized,
+this means that you don't need to initialize it,
+and that any other data will be lost if you not copy to another struct.
+.PP
+The
+.I ignotum_maplist_t
+is defined in
+.I <ignotum.h>
+as follows:
+.PP
+.in +4n
+.EX
+typedef struct ignotum_maplist {
+    size_t len;
+    ignotum_mapinfo_t *maps;
+} ignotum_maplist_t;
+.EE
+.in
+.PP
+The members of
+.I ignotum_maplist_t
+are:
+.TP
+.I len
+The number of maps elements.
+.TP
+.I maps
+A list of mapped memory regions.
+.PP
+The
+.I ignotum_mapinfo_t
+is defined in
+.I <ignotum.h>
+as follows:
+.PP
+.in +4n
+.EX
+typedef struct ignotum_mapinfo {
+    off_t start_addr;
+    off_t end_addr;
+    union {
+        struct {
+            unsigned char is_x:1;
+            unsigned char is_w:1;
+            unsigned char is_r:1;
+            unsigned char is_p:1;
+            unsigned char is_s:1;
+        };
+        int perms;
+    };
+    off_t offset;
+    dev_t st_dev;
+    ino_t st_ino;
+    char *pathname;
+} ignotum_mapinfo_t;
+.EE
+.in
+.PP
+More information about /proc/[\fIpid\fP]/maps structure can be found in
+.BR proc (5).
+.PP
+The
+.BR free_ignotum_maplist ()
+function frees the memory that was allocated for the list.
+.SH RETURN VALUE
+On success, returns the number of memory maps.
+.PP
+On error, -1 is returned and errno is set to indicate the cause of the error.
+.SH NOTES
+even if -1 is returned and
+.I errno
+is equal to \fBENOMEM\fP, maybe data can be retrieve in list.
+.SH EXAMPLE
+The following program demonstrate the use of
+.BR ignotum_gemaplist ()
+and
+.BR free_ignotum_maplist ()
+.PP
+.EX
+#include <ignotum.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+
+#define eprintf(x...) fprintf(stderr, x);
+
+int main(int argc, char **argv){
+    if(argc != 2){
+        printf("%s [pid]\\n", argv[0]);
+        return 1;
+    }
+
+    ignotum_maplist_t maplist;
+    ssize_t count;
+    pid_t pid;
+    size_t i;
+
+    pid = atoi(argv[1]);
+
+    count = ignotum_getmaplist(pid, &maplist);
+    if(count > -1){
+        // you can use count variable instead of maplist.len
+        for(i=0; i<maplist.len; i++){
+            printf("start_addr: %lx | end_addr: %lx\\n",
+                maplist.maps[i].start_addr, maplist.maps[i].end_addr);
+        }
+    } else {
+        switch(errno){
+            case ENOENT:
+                eprintf("pid %d not exists or proc is not mounted\\n", pid);
+            break;
+            case EACCES:
+                eprintf("you cannot open /proc/%d/maps\\n", pid);
+            break;
+            case ENOMEM:
+                eprintf("malloc or realloc fails\\n");
+                eprintf("partial number of maps retrieve: %zd\\n", count);
+            break;
+            default:
+                perror("another error happens");
+        }
+    }
+
+
+    free_ignotum_maplist(&maplist);
+    return 0;
+}
+.EE
+.SH SEE ALSO
+.BR ignotum_getmapbyaddr (3),
+.BR proc(5)
