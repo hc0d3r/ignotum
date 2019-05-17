@@ -1,12 +1,12 @@
 .TH ignotum_mem_write 3 2019 "Library" "libignotum man page"
 .SH NAME
-ignotum_mem_read, ignotum_mem_write \- read from or write to a pid at a given address
+ignotum_mem_read, ignotum_mem_write \- read from or write to a pid at the given address
 .SH SYNOPSIS
 .B #include <ignotum.h>
 .PP
-.BI "ssize_t ignotum_mem_read(pid_t " pid ", void *" buf ", size_t " addr );
+.BI "ssize_t ignotum_mem_read(pid_t " pid ", void *" buf ", size_t " n ", off_t " addr );
 .PP
-.BI "ssize_t ignotum_mem_write(pid_t " pid ", const void *" pid ", size_t " addr );
+.BI "ssize_t ignotum_mem_write(pid_t " pid ", const void *" buf ", size_t " n ", off_t " addr );
 .SH DESCRIPTION
 .BR ignotum_mem_read()
 reads up to
