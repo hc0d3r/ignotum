@@ -1,0 +1,44 @@
+.TH ignotum_mem_read 3 2019 "Library" "libignotum man page"
+.SH NAME
+ignotum_mem_read, ignotum_mem_write \- read from or write to a pid at a given address
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "ssize_t ignotum_mem_read(pid_t " pid ", void *" buf ", size_t " addr );
+.PP
+.BI "ssize_t ignotum_mem_write(pid_t " pid ", const void *" pid ", size_t " addr );
+.SH DESCRIPTION
+.BR ignotum_mem_read()
+reads up to
+.I n
+bytes from specific
+.I pid
+at address given at
+.I addr
+into the buffer starting at
+\fIbuf\fP.
+.PP
+.BR ignotum_mem_write ()
+writes up to
+.I n
+bytes from the buffer starting at
+.I buf
+to the specific
+.I pid
+at address
+\fIaddr\fP.
+.PP
+The
+.I pid
+equal to 0 means that is the running pid.
+.SH RETURN
+On success, return the number of bytes read (ignotum_mem_read) or written (ignotum_mem_write).
+On error, -1 is returned and errno is set to indicate the cause of the error.
+.SH NOTES
+these functions are only a wrapper to open /proc/[pid]/mem and pwrite/pread on it
+.SH SEE ALSO
+.BR ignotum_ptrace_read (3),
+.BR ignotum_ptrace_write (3),
+.BR open (2),
+.BR pwrite (2),
+.BR pread (2)
