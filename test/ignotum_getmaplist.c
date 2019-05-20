@@ -14,7 +14,7 @@ int main(void){
     if((nb = ignotum_getmaplist(&addrs, 0)) > 0){
         printf("maps total --> %zd\n", nb);
         for(i=0; i<addrs.len; i++){
-            printf("start-address-> %zx | end-address-> %zx\n", addrs.maps[i].start_addr, addrs.maps[i].end_addr);
+            printf("name: %s | start-address-> %zx | end-address-> %zx\n", addrs.maps[i].pathname, addrs.maps[i].start_addr, addrs.maps[i].end_addr);
         }
     }
 
