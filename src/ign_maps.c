@@ -33,20 +33,8 @@ static int getnextmap(ignotum_mapinfo_t *map, parser_t *info, int fd){
     return ret;
 }
 
-ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
-    int maps_fd, serr;
-    ssize_t ret = -1;
-
-    ignotum_mapinfo_t map;
-    parser_t info;
-
+static int openmap(pid_t pid){
     char buf[32], *ptr;
-    void *tmp;
-
-    size_t init_alloc = 24;
-
-    list->len = 0;
-    list->maps = NULL;
 
     if(pid){
         sprintf(buf, "/proc/%d/maps", pid);
@@ -55,7 +43,24 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
         ptr = "/proc/self/maps";
     }
 
-    if((maps_fd = open(ptr, O_RDONLY)) == -1){
+    return open(ptr, O_RDONLY);
+}
+
+ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
+    int maps_fd, serr;
+    ssize_t ret = -1;
+
+    ignotum_mapinfo_t map;
+    parser_t info;
+
+    void *tmp;
+
+    size_t init_alloc = 24;
+
+    list->len = 0;
+    list->maps = NULL;
+
+    if((maps_fd = openmap(pid)) == -1){
         goto end;
     }
 
@@ -109,16 +114,8 @@ int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
     parser_t info;
 
     ignotum_mapinfo_t map;
-    char buf[32], *ptr;
 
-    if(pid){
-        sprintf(buf, "/proc/%d/maps", pid);
-        ptr = buf;
-    } else {
-        ptr = "/proc/self/maps";
-    }
-
-    if((maps_fd = open(ptr, O_RDONLY)) == -1){
+    if((maps_fd = openmap(pid)) == -1){
         goto open_fail;
     }
 
