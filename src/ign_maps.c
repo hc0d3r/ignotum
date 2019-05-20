@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <fnmatch.h>
 
 #include "ignotum.h"
 #include "ign_str.c"
@@ -140,6 +141,45 @@ int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
     errno = serr;
 
     open_fail:
+    return ret;
+}
+
+int ignotum_getbasemap(ignotum_mapinfo_t *out, pid_t pid, const char *filename, int wildcard){
+    ignotum_mapinfo_t map;
+    parser_t info;
+
+    int fd, ret = 1;
+
+    fd = openmap(pid);
+    if(fd == -1)
+        goto end;
+
+    memset(&map, 0x0, sizeof(ignotum_mapinfo_t));
+
+    info.flag = ignp_addr_start;
+    info.aux_len = info.flag = info.limit = info.i = 0;
+
+    while(getnextmap(&map, &info, fd)){
+        if(map.pathname && !map.offset){
+            if(!wildcard){
+                ret = strcmp(map.pathname, filename);
+            } else {
+                ret = fnmatch(filename, map.pathname, 0);
+            }
+
+            if(!ret){
+                memcpy(out, &map, sizeof(ignotum_mapinfo_t));
+                break;
+            }
+        }
+
+        free(map.pathname);
+        memset(&map, 0x0, sizeof(ignotum_mapinfo_t));
+    }
+
+    close(fd);
+
+    end:
     return ret;
 }
 

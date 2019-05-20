@@ -41,6 +41,7 @@ typedef struct ignotum_search {
 
 ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid);
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr);
+int ignotum_getbasemap(ignotum_mapinfo_t *out, pid_t pid, const char *filename, int wildcard);
 
 ssize_t ignotum_mem_write(pid_t pid, const void *buf, size_t n, off_t addr);
 ssize_t ignotum_mem_read(pid_t pid, void *buf, size_t n, off_t addr);
