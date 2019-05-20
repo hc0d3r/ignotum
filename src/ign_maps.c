@@ -2,12 +2,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "ignotum.h"
 #include "ign_str.c"
 
 ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
-    int maps_fd, flag, i, size, aux_len;
+    int maps_fd, flag, i, size, aux_len, serr;
     ignotum_mapinfo_t info;
     ssize_t ret = -1;
     char buf[1024], *ptr;
@@ -45,7 +46,9 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
                     init_alloc += 24;
                     tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(init_alloc));
                     if(tmp == NULL){
+                        serr = errno;
                         free(info.pathname);
+                        errno = serr;
                         goto alloc_error;
                     }
                     list->maps = tmp;
@@ -72,14 +75,16 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     ret = list->len;
 
     alloc_error:
-        close(maps_fd);
+    serr = errno;
+    close(maps_fd);
+    errno = serr;
 
     end:
-        return ret;
+    return ret;
 }
 
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
-    int maps_fd, flag, i, size, aux_len, ret = 0;
+    int maps_fd, flag, i, size, aux_len, serr, ret = 0;
     ignotum_mapinfo_t tmp;
     char buf[1024], *ptr;
 
@@ -119,9 +124,12 @@ int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
 
 
     end:
-        close(maps_fd);
+    serr = errno;
+    close(maps_fd);
+    errno = serr;
+
     open_fail:
-        return ret;
+    return ret;
 }
 
 void free_ignotum_maplist(ignotum_maplist_t *list){
