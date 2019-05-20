@@ -14,6 +14,14 @@ enum {
     ignp_end,
 };
 
+typedef struct {
+    char buf[1024];
+    int i;
+    int limit;
+    int flag;
+    int aux_len;
+} parser_t;
+
 static int hexchar(char c){
     if(c >= '0' && c <= '9')
         c = c-'0';
@@ -23,20 +31,19 @@ static int hexchar(char c){
     return c;
 }
 
-static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int limit,
-    int *flag, int *aux_len){
-    int aux = *i;
+static void parser(struct ignotum_mapinfo *out, parser_t *info){
+    int aux = info->i;
     size_t len, tmp;
     char c;
 
-    while(aux<limit && *flag != ignp_end){
-        switch(*flag){
+    while(aux<info->limit && info->flag != ignp_end){
+        switch(info->flag){
             case ignp_addr_start:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
 
                     if(c == '-'){
-                        *flag = ignp_addr_end;
+                        info->flag = ignp_addr_end;
                         break;
                     }
 
@@ -46,11 +53,11 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_addr_end:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
 
                     if(c == ' '){
-                        *flag = ignp_flags;
+                        info->flag = ignp_flags;
                         break;
                     }
                     out->end_addr <<= 4;
@@ -59,10 +66,10 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_flags:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
                     if(c == ' '){
-                        *flag = ignp_offset;
+                        info->flag = ignp_offset;
                         break;
                     }
 
@@ -85,11 +92,11 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_offset:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
 
                     if(c == ' '){
-                        *flag = ignp_dev;
+                        info->flag = ignp_dev;
                         break;
                     }
 
@@ -99,11 +106,11 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_dev:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
 
                     if(c == ' '){
-                        *flag = ignp_ino;
+                        info->flag = ignp_ino;
                         break;
                     }
 
@@ -117,11 +124,11 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_ino:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux<info->limit){
+                    c = info->buf[aux++];
 
                     if(c == ' '){
-                        *flag = ignp_skip;
+                        info->flag = ignp_skip;
                         break;
                     }
 
@@ -131,14 +138,14 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             break;
 
             case ignp_skip:
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
                     if(c == ' '){
                         continue;
                     } else if(c == '\n'){
-                        *flag = ignp_end;
+                        info->flag = ignp_end;
                     } else {
-                        *flag = ignp_pathname;
+                        info->flag = ignp_pathname;
                         aux--;
                     }
                     break;
@@ -148,26 +155,26 @@ static void parser(struct ignotum_mapinfo *out, const char *buf, int *i, int lim
             case ignp_pathname:
                 tmp = aux;
 
-                while(aux<limit){
-                    c = buf[aux++];
+                while(aux < info->limit){
+                    c = info->buf[aux++];
                     if(c == '\n'){
-                        *flag = ignp_end;
+                        info->flag = ignp_end;
                         break;
                     }
                 }
 
                 len = aux-tmp;
-                if(*flag == ignp_end)
+                if(info->flag == ignp_end)
                     len--;
 
-                out->pathname = realloc(out->pathname, *aux_len+len+1);
-                memcpy(&(out->pathname[*aux_len]), &buf[tmp], len);
-                out->pathname[*aux_len+len] = 0x0;
+                out->pathname = realloc(out->pathname, info->aux_len+len+1);
+                memcpy(&(out->pathname[info->aux_len]), info->buf+tmp, len);
+                out->pathname[info->aux_len+len] = 0x0;
 
-                *aux_len += len;
+                info->aux_len += len;
             break;
         }
     }
 
-    *i = aux;
+    info->i = aux;
 }

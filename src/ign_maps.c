@@ -2,15 +2,57 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "ignotum.h"
 #include "ign_str.c"
 
+static int getnextmap(ignotum_mapinfo_t *map, parser_t *info, int fd){
+    int ret = 0;
+
+    if(info->limit > info->i)
+        goto do_parser;
+
+    while((info->limit = read(fd, info->buf, sizeof(info->buf))) > 0){
+        info->i = 0;
+        while(info->limit > info->i){
+            do_parser:
+            parser(map, info);
+
+            if(info->flag == ignp_end){
+                info->flag = ignp_addr_start;
+                info->aux_len = 0;
+
+                ret = 1;
+                goto end;
+            }
+        }
+    }
+
+    end:
+    return ret;
+}
+
+static int openmap(pid_t pid){
+    char buf[32], *ptr;
+
+    if(pid){
+        sprintf(buf, "/proc/%d/maps", pid);
+        ptr = buf;
+    } else {
+        ptr = "/proc/self/maps";
+    }
+
+    return open(ptr, O_RDONLY);
+}
+
 ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
-    int maps_fd, flag, i, size, aux_len;
-    ignotum_mapinfo_t info;
+    int maps_fd, serr;
     ssize_t ret = -1;
-    char buf[1024];
+
+    ignotum_mapinfo_t map;
+    parser_t info;
+
     void *tmp;
 
     size_t init_alloc = 24;
@@ -18,12 +60,7 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     list->len = 0;
     list->maps = NULL;
 
-    if(pid)
-        sprintf(buf, "/proc/%d/maps", pid);
-    else
-        memcpy(buf, "/proc/self/maps", 16);
-
-    if((maps_fd = open(buf, O_RDONLY)) == -1){
+    if((maps_fd = openmap(pid)) == -1){
         goto end;
     }
 
@@ -31,32 +68,26 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     if(list->maps == NULL)
         goto alloc_error;
 
-    memset(&info, 0, sizeof(ignotum_mapinfo_t));
-    flag = ignp_addr_start;
-    aux_len = 0;
+    memset(&map, 0, sizeof(ignotum_mapinfo_t));
+    info.flag = ignp_addr_start;
+    info.aux_len = info.flag = info.limit = info.i = 0;
 
-    while((size = read(maps_fd, buf, sizeof(buf))) > 0 ){
-        for(i=0; i<size;){
-            parser(&info, buf, &i, size, &flag, &aux_len);
-            if(flag == ignp_end){
-                if(list->len == init_alloc){
-                    init_alloc += 24;
-                    tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(init_alloc));
-                    if(tmp == NULL){
-                        free(info.pathname);
-                        goto alloc_error;
-                    }
-                    list->maps = tmp;
-                }
-
-                memcpy(&(list->maps[list->len]), &info, sizeof(ignotum_mapinfo_t));
-                memset(&info, 0, sizeof(ignotum_mapinfo_t));
-                list->len++;
-
-                flag = ignp_addr_start;
-                aux_len = 0;
+    while(getnextmap(&map, &info, maps_fd)){
+        if(list->len == init_alloc){
+            init_alloc += 24;
+            tmp = realloc(list->maps, sizeof(ignotum_mapinfo_t)*(init_alloc));
+            if(tmp == NULL){
+                serr = errno;
+                free(map.pathname);
+                errno = serr;
+                goto alloc_error;
             }
+            list->maps = tmp;
         }
+
+        memcpy(list->maps+list->len, &map, sizeof(ignotum_mapinfo_t));
+        memset(&map, 0, sizeof(ignotum_mapinfo_t));
+        list->len++;
     }
 
     if(list->len && (list->len < init_alloc)){
@@ -70,54 +101,46 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     ret = list->len;
 
     alloc_error:
-        close(maps_fd);
+    serr = errno;
+    close(maps_fd);
+    errno = serr;
 
     end:
-        return ret;
+    return ret;
 }
 
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
-    int maps_fd, flag, i, size, aux_len, ret = 0;
-    ignotum_mapinfo_t tmp;
-    char buf[1024];
+    int maps_fd, serr, ret = 0;
+    parser_t info;
 
-    if(pid)
-        sprintf(buf, "/proc/%d/maps", pid);
-    else
-        memcpy(buf, "/proc/self/maps", 16);
+    ignotum_mapinfo_t map;
 
-    if((maps_fd = open(buf, O_RDONLY)) == -1){
+    if((maps_fd = openmap(pid)) == -1){
         goto open_fail;
     }
 
-    memset(&tmp, 0x0, sizeof(ignotum_mapinfo_t));
+    memset(&map, 0x0, sizeof(ignotum_mapinfo_t));
 
-    flag = ignp_addr_start;
-    aux_len = 0;
+    info.flag = ignp_addr_start;
+    info.aux_len = info.flag = info.limit = info.i = 0;
 
-    while((size = read(maps_fd, buf, sizeof(buf))) > 0){
-        for(i=0; i<size;){
-            parser(&tmp, buf, &i, size, &flag, &aux_len);
-            if(flag == ignp_end){
-                if(addr >= tmp.start_addr && tmp.end_addr > addr){
-                    memcpy(out, &tmp, sizeof(ignotum_mapinfo_t));
-                    ret = 1;
-                    goto end;
-                }
-
-                free(tmp.pathname);
-                memset(&tmp, 0x0, sizeof(ignotum_mapinfo_t));
-                flag = ignp_addr_start;
-                aux_len = 0;
-            }
+    while(getnextmap(&map, &info, maps_fd)){
+        if(addr >= map.start_addr && map.end_addr > addr){
+            memcpy(out, &map, sizeof(ignotum_mapinfo_t));
+            ret = 1;
+            break;
         }
+
+        free(map.pathname);
+        memset(&map, 0x0, sizeof(ignotum_mapinfo_t));
     }
 
+    serr = errno;
+    close(maps_fd);
+    errno = serr;
 
-    end:
-        close(maps_fd);
     open_fail:
-        return ret;
+    return ret;
 }
 
 void free_ignotum_maplist(ignotum_maplist_t *list){
