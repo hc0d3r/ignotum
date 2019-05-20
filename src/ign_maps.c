@@ -10,7 +10,7 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     int maps_fd, flag, i, size, aux_len;
     ignotum_mapinfo_t info;
     ssize_t ret = -1;
-    char buf[1024];
+    char buf[1024], *ptr;
     void *tmp;
 
     size_t init_alloc = 24;
@@ -18,12 +18,14 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     list->len = 0;
     list->maps = NULL;
 
-    if(pid)
+    if(pid){
         sprintf(buf, "/proc/%d/maps", pid);
-    else
-        memcpy(buf, "/proc/self/maps", 16);
+        ptr = buf;
+    } else {
+        ptr = "/proc/self/maps";
+    }
 
-    if((maps_fd = open(buf, O_RDONLY)) == -1){
+    if((maps_fd = open(ptr, O_RDONLY)) == -1){
         goto end;
     }
 
@@ -35,7 +37,7 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
     flag = ignp_addr_start;
     aux_len = 0;
 
-    while((size = read(maps_fd, buf, sizeof(buf))) > 0 ){
+    while((size = read(maps_fd, buf, sizeof(buf))) > 0){
         for(i=0; i<size;){
             parser(&info, buf, &i, size, &flag, &aux_len);
             if(flag == ignp_end){
@@ -79,14 +81,16 @@ ssize_t ignotum_getmaplist(ignotum_maplist_t *list, pid_t pid){
 int ignotum_getmapbyaddr(ignotum_mapinfo_t *out, pid_t pid, off_t addr){
     int maps_fd, flag, i, size, aux_len, ret = 0;
     ignotum_mapinfo_t tmp;
-    char buf[1024];
+    char buf[1024], *ptr;
 
-    if(pid)
+    if(pid){
         sprintf(buf, "/proc/%d/maps", pid);
-    else
-        memcpy(buf, "/proc/self/maps", 16);
+        ptr = buf;
+    } else {
+        ptr = "/proc/self/maps";
+    }
 
-    if((maps_fd = open(buf, O_RDONLY)) == -1){
+    if((maps_fd = open(ptr, O_RDONLY)) == -1){
         goto open_fail;
     }
 
