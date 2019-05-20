@@ -15,7 +15,7 @@ enum {
 };
 
 typedef struct {
-    const char *buf;
+    char buf[1024];
     int i;
     int limit;
     int flag;
