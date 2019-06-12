@@ -11,7 +11,6 @@ VERSION=0.2
 SHARED_OBJ=libignotum.so.$(VERSION)
 STATIC_OBJ=libignotum.a
 
-INSTALLPROG=/usr/bin/install
 PREFIX?=/usr
 
 DOC_DIR=doc
@@ -39,10 +38,13 @@ lib/$(SHARED_OBJ): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,$(SHARED_OBJ) -o lib/$(SHARED_OBJ) $(OBJS)
 
 install: all
-	$(INSTALLPROG) lib/$(SHARED_OBJ) $(PREFIX)/lib
-	$(INSTALLPROG) lib/$(STATIC_OBJ) $(PREFIX)/lib
-	$(INSTALLPROG) lib/libignotum.so $(PREFIX)/lib
-	$(INSTALLPROG) src/ignotum.h $(PREFIX)/include/ignotum.h
+	install -d $(PREFIX)/lib
+	install lib/$(SHARED_OBJ) $(PREFIX)/lib
+	install lib/$(STATIC_OBJ) $(PREFIX)/lib
+	install lib/libignotum.so $(PREFIX)/lib
+
+	install -d $(PREFIX)/include
+	install -m 644 src/ignotum.h $(PREFIX)/include/ignotum.h
 
 uninstall:
 	-rm -f $(PREFIX)/lib/$(SHARED_OBJ) $(PREFIX)/lib/libignotum.so \
@@ -65,7 +67,8 @@ $(DOC_DIR)/%.3.gz: $(DOC_DIR)/%.3
 	gzip -c $^ > $@
 
 doc-install: doc
-	$(INSTALLPROG) -t $(MAN_PAGES_DIR)/man3/ $(GZIP_PAGES)
+	install -d $(MAN_PAGES_DIR)/man3/
+	install -m 644 -t $(MAN_PAGES_DIR)/man3/ $(GZIP_PAGES)
 
 clean-doc:
 	rm -f $(GZIP_PAGES)
