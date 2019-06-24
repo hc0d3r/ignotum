@@ -70,23 +70,23 @@ static void parser(struct ignotum_mapinfo *out, parser_t *info){
                     c = info->buf[aux++];
                     if(c == ' '){
                         info->flag = ignp_offset;
+
+                        /* null terminated string */
+                        out->perms[info->aux_len] = 0x0;
+
+                        /* setting auxiliary information */
+                        out->is_r = out->perms[0] != '-';
+                        out->is_w = out->perms[1] != '-';
+                        out->is_x = out->perms[2] != '-';
+
+                        info->aux_len = 0;
                         break;
                     }
 
-
-                    if(c == 'p'){
-                        out->is_p = 1;
-                        continue;
-                    } else if(c == 's'){
-                        out->is_s = 1;
-                        continue;
-                    }
-
-                    out->perms <<= 1;
-
-                    // r - 4 | w - 2 | x - 1
-                    if(c != '-'){
-                        out->perms |= 1;
+                    /* paranoid */
+                    if(info->aux_len < 4){
+                        /* rwx[ps] p = private, s = shared */
+                        out->perms[info->aux_len++] = c;
                     }
                 }
             break;

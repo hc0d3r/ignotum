@@ -12,16 +12,14 @@ int main(void){
     }
 
     if(ignotum_getmapbyaddr(&map, 0, (off_t)malloc(0))){
-        printf("malloc returns data from %s | permissions-> read: %c, write: %c, exec: %c\n", map.pathname,
-            (map.is_r ? 'y' : 'n'), (map.is_w ? 'y' : 'n'), (map.is_x ? 'y' : 'n')
-        );
+        printf("malloc returns data from %s | permissions: %s read: %c, write: %c, exec: %c\n", map.pathname,
+            map.perms, (map.is_r ? 'y' : 'n'), (map.is_w ? 'y' : 'n'), (map.is_x ? 'y' : 'n'));
         free(map.pathname);
     }
 
     if(ignotum_getmapbyaddr(&map, 0, (off_t)main)){
-        printf("main function permissions: read: %c, write: %c, exec: %c\n",
-            (map.is_r ? 'y' : 'n'), (map.is_w ? 'y' : 'n'), (map.is_x ? 'y' : 'n')
-        );
+        printf("main function permissions: %s read: %c, write: %c, exec: %c\n",
+            map.perms, (map.is_r ? 'y' : 'n'), (map.is_w ? 'y' : 'n'), (map.is_x ? 'y' : 'n'));
         free(map.pathname);
     }
 

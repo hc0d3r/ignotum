@@ -57,16 +57,10 @@ as follows:
 typedef struct ignotum_mapinfo {
     off_t start_addr;
     off_t end_addr;
-    union {
-        struct {
-            unsigned char is_x:1;
-            unsigned char is_w:1;
-            unsigned char is_r:1;
-            unsigned char is_p:1;
-            unsigned char is_s:1;
-        };
-        int perms;
-    };
+    unsigned char perms[5];
+    unsigned char is_x;
+    unsigned char is_w;
+    unsigned char is_r;
     off_t offset;
     dev_t st_dev;
     ino_t st_ino;
