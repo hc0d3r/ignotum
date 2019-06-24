@@ -11,8 +11,6 @@ VERSION=0.2
 SHARED_OBJ=libignotum.so.$(VERSION)
 STATIC_OBJ=libignotum.a
 
-PREFIX?=/usr
-
 DOC_DIR=doc
 MAN_PAGES=$(shell find $(DOC_DIR) -type f -name '*.3')
 GZIP_PAGES=$(MAN_PAGES:%=%.gz)
@@ -20,6 +18,21 @@ MAN_PAGES_DIR=$(PREFIX)/share/man
 
 SRC_DIR = src
 TEST_DIR = test
+
+ifeq ($(PREFIX),)
+    PREFIX := /usr
+endif
+
+# check if file exists
+ifneq (,$(wildcard ./lib/libignotum.so))
+	# get elf arch, 01 = 32 bits, 02 = 64 bits
+	ELFARCH := $(shell od -An -t x1 -j 4 -N 1 lib/libignotum.so)
+	ifeq ($(strip $(ELFARCH)),01)
+		LIBSUFIX := 32
+	else
+		LIBSUFIX := 64
+	endif
+endif
 
 .PHONY: all install uninstall test
 
@@ -38,10 +51,10 @@ lib/$(SHARED_OBJ): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,$(SHARED_OBJ) -o lib/$(SHARED_OBJ) $(OBJS)
 
 install: all
-	install -d $(PREFIX)/lib
-	install lib/$(SHARED_OBJ) $(PREFIX)/lib
-	install lib/$(STATIC_OBJ) $(PREFIX)/lib
-	install lib/libignotum.so $(PREFIX)/lib
+	install -d $(PREFIX)/lib$(LIBSUFIX)
+	install lib/$(SHARED_OBJ) $(PREFIX)/lib$(LIBSUFIX)
+	install lib/$(STATIC_OBJ) $(PREFIX)/lib$(LIBSUFIX)
+	install lib/libignotum.so $(PREFIX)/lib$(LIBSUFIX)
 
 	install -d $(PREFIX)/include
 	install -m 644 src/ignotum.h $(PREFIX)/include/ignotum.h
