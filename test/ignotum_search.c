@@ -6,42 +6,48 @@
 #include <fcntl.h>
 
 int main(void){
-    size_t j, ret, i;
+    ignotum_mapinfo_t map;
+    size_t len, i;
+    char *buf;
+    off_t addr;
 
     char test[]="abcdefghijklmnopq ------ leet --------";
-    (void)test;
-
-    ignotum_maplist_t addrs = {.len = 0, .maps = NULL};
-    ignotum_search_t result = DEFAULT_IGNOTUM_MEMSEARCH;
-
     printf("char test[] = %p\n", test);
 
-    if(ignotum_getmaplist(&addrs, 0) > 0){
-        for(i=0; i<addrs.len; i++){
-            if(addrs.maps[i].pathname == NULL)
-                continue;
-
-            if(!strcmp("[stack]", addrs.maps[i].pathname)){
-                size_t len = addrs.maps[i].end_addr-addrs.maps[i].start_addr;
-                char *data = malloc(len);
-
-                len = ignotum_mem_read(0, data, len, addrs.maps[i].start_addr);
-                ret = ignotum_search(&result, addrs.maps[i].start_addr, data, len, "leet", 4);
-
-                if(ret){
-                    for(j=0; j<result.len; j++){
-                        printf("leet found at =: %zx | %s\n", result.addrs[j], (char *)result.addrs[j] );
-                    }
-
-                    free_ignotum_search(&result);
-                }
-
-                break;
-            }
-        }
+    /* 0 = current pid */
+    ignotum_getmapbyaddr(&map, 0, (off_t)test);
+    len = map.end_addr - map.start_addr;
+    buf = malloc(len);
+    if(buf == NULL){
+        perror("malloc()");
+        return 1;
     }
 
-    free_ignotum_maplist(&addrs);
-    return 0;
+    if((size_t)ignotum_mem_read(0, buf, len, map.start_addr) != len){
+        perror("ignotum_mem_read()");
+        return 1;
+    }
 
+    ignotum_search_t search;
+    ignotum_search_init(&search, "abcdefghijklmnopq ------ leet", 29);
+    if(ignotum_search_loop(&search, &addr, map.start_addr, buf, len) != IGNOTUM_FOUND){
+        printf("[error] not found ...\n");
+    }
+
+    printf("string found at addr: %lx | %s\n", addr, (char *)addr);
+
+    /* circular search */
+    ignotum_search_init(&search, "abcdefghijklmnopq ------ leet", 29);
+    for(i=0; i<len; i+=4){
+        if(ignotum_search_loop(&search, &addr, map.start_addr, buf, len) == IGNOTUM_FOUND){
+            printf("string found at addr: %lx | %s\n", addr, (char *)addr);
+            break;
+        }
+
+        /* you must ever update the virtual address or the not will match */
+        map.start_addr += 4;
+    }
+
+
+    return 0;
 }

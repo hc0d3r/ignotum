@@ -1,34 +1,46 @@
-#include <stdlib.h>
-
 #include "ignotum.h"
 
+void ignotum_search_init(ignotum_search_t *cs, const void *search, size_t len){
+    cs->search = (char *)search;
+    cs->len = len;
+    cs->current = 0;
+    cs->i = 0;
+}
 
-size_t ignotum_search(ignotum_search_t *out, off_t remote_addr, const void *haystack, size_t hlen, const void *needle, size_t nlen){
-    size_t i, j, k, diff, ret = 0;
+int ignotum_search_loop(ignotum_search_t *cs, off_t *out, off_t vaddr, const void *mem, size_t len){
+    const char *aux = mem;
+    size_t i = 0;
+    int ret;
 
-    if(!hlen || nlen > hlen){
-        goto end;
+    if(cs->current+cs->i != (size_t)vaddr){
+        cs->i = 0;
+        cs->current = vaddr;
     }
 
-    diff = hlen-nlen;
-
-    for(i=0;i<=diff;i++){
-        for(j=i, k=0; j<hlen && k<nlen && *(char *)(haystack+j) == *(char *)(needle+k); j++, k++){
-            if(k == nlen-1){
-                out->addrs = realloc(out->addrs, sizeof(off_t)*(out->len+1));
-                out->addrs[out->len] = remote_addr+i;
-                out->len++;
-                ret++;
+    while(i < len && cs->i < cs->len){
+        if(aux[i] == cs->search[cs->i]){
+            cs->i++;
+            i++;
+        } else {
+            if(cs->i){
+                cs->i = 0;
+            } else {
+                i++;
             }
+
+            cs->current = vaddr+i;
         }
     }
 
-    end:
-        return ret;
+    if(cs->i == cs->len){
+        *out = cs->current;
+        cs->i = 0;
+        ret = IGNOTUM_FOUND;
+    } else if(cs->i){
+        ret = IGNOTUM_PARTIAL;
+    } else {
+        ret = IGNOTUM_NONE;
+    }
 
-}
-
-void free_ignotum_search(ignotum_search_t *search_res){
-    free(search_res->addrs);
-    search_res->len = 0;
+    return ret;
 }
