@@ -1,0 +1,100 @@
+.TH ignotum_search_loop 3 2019 "Library" "libignotum man page"
+.SH NAME
+ignotum_search_loop \- locate a substring in a circular buffer
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "int ignotum_search_loop(ignotum_search_t *" cs ", off_t * " out ", off_t " vaddr ", const void *" mem ", size_t " len );
+.PP
+.BI "void ignotum_search_init(ignotum_search_t *" cs ", const void *" search ", size_t " len );
+.SH DESCRIPTION
+.BR ignotum_search_init ()
+init the ignotum_search_t struct and set the substring that will be located.
+.PP
+.BR ignotum_search_loop ()
+finds the start of the first occurrence of the substring in
+.I mem
+of length \fIlen\fP, then fill the
+.I out
+variable with the \fIposition+vaddr\fP.
+.PP
+In a consecutive call to ignotum_search_loop, if
+.I vaddr
+aren't equal to \fIprevious vaddr+previous len\fP, any progress will be erased,
+so you need always update the
+.I vaddr
+if you want search a substring in a circular buffer.
+.PP
+The
+.I ignotum_search_t
+is defined in
+.I <ignotum.h>
+as follows:
+.PP
+.EX
+typedef struct {
+    off_t current;
+    char *search;
+    size_t len;
+    size_t i;
+} ignotum_search_t;
+.EE
+.PP
+The members of
+.I ignotum_search_t
+are:
+.TP
+.I current
+The current virtual address.
+.TP
+.I search
+The substring to search.
+.TP
+.I len
+The size of substring.
+.TP
+.I i
+The current substring index.
+.PP
+.SH RETURN VALUE
+.TP
+.B IGNOTUM_NONE
+No substring was found.
+.TP
+.B IGNOTUM_PARTIAL
+Part of the substring was found, but the end of *mem* was reached.
+.TP
+.B IGNOTUM_FOUND
+The substring was found.
+.SH EXAMPLE
+.EX
+#include <ignotum.h>
+#include <stdio.h>
+
+int main(void){
+    char *word="abcabcabc1abcabc";
+    ignotum_search_t search;
+    off_t ret, vaddr = 0;
+
+    /* set the substring to locate */
+    ignotum_search_init(&search, "abc1a", 5);
+
+    while(*word){
+        /* check one byte per time,
+         * just to exemplify a circular buffer search */
+        if(ignotum_search_loop(&search, &ret, vaddr, word, 1) == IGNOTUM_FOUND){
+            printf("match at %lu\\n", ret);
+            break;
+        }
+
+        vaddr++;
+        word++;
+    }
+
+    return 0;
+}
+.EE
+.SH SEE ALSO
+.BR ignotum_getmaplist (3),
+.BR ignotum_mem_read (3),
+.BR ignotum_ptrace_read (3)
