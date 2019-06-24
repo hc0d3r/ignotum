@@ -8,7 +8,7 @@ ignotum_ptrace_read, ignotum_ptrace_write \- read from or write to a ptraced pid
 .PP
 .BI "ssize_t ignotum_ptrace_write(pid_t " pid ", const void *" buf ", size_t " n ", long " addr );
 .SH DESCRIPTION
-.BR ignotum_mem_read()
+.BR ignotum_ptrace_read ()
 reads up to
 .I n
 bytes from specific
@@ -18,7 +18,7 @@ at address given at
 into the buffer starting at
 \fIbuf\fP.
 .PP
-.BR ignotum_mem_write ()
+.BR ignotum_ptrace_write ()
 writes up to
 .I n
 bytes from the buffer starting at
