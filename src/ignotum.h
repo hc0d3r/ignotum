@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sys/types.h>
 
+/* globals */
+extern const char * const ignotum_version;
 
 /* enum for ignotum_search* */
 enum {

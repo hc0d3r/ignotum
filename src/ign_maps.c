@@ -8,6 +8,8 @@
 #include "ignotum.h"
 #include "ign_str.c"
 
+const char * const ignotum_version = "0.3.0";
+
 static int getnextmap(ignotum_mapinfo_t *map, parser_t *info, int fd){
     int ret = 0;
 
