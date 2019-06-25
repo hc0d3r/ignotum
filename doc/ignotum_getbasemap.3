@@ -1,0 +1,62 @@
+.TH ignotum_getbasemap 3 2019 "Library" "libignotum man page"
+.SH NAME
+ignotum_getbasemap \- get the first map related to a file
+.SH SYNOPSIS
+.B #include <ignotum.h>
+.PP
+.BI "ignotum_getbasemap(ignotum_mapinfo_t *" out ", pid_t " pid ", const char *" filename ", int " wildcard );
+.SH DESCRIPTION
+.BR ignotum_getbasemap ()
+finds the first memory map associated with the filename of the given
+.I pid
+and fill
+.I out
+with the map information.
+.PP
+A zero
+.I pid
+is equal to the current pid, so you don't need call
+.BR getpid ()
+if you want lookup in the current pid.
+.PP
+If
+.I wildcard
+was a non zero value this mean that
+.I filename
+are a wildcard pattern (see
+.BR fnmatch (3)).
+.SH RETURN VALUE
+On success returns 0, otherwise, returns a nonzero value.
+.SH EXAMPLE
+.EX
+#include <ignotum.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int main(void){
+    ignotum_mapinfo_t map;
+
+    /* 0 = current pid
+     * *libc* = try get the libc base address
+     * 1 = threat the filename as a wildcard pattern */
+    if(ignotum_getbasemap(&map, 0, "*libc*", 1) == 0){
+        printf("base address for libc found:\\n");
+
+        /* free the pathname */
+        free(map.pathname);
+    }
+
+    /* get the first mapped file
+     * usually this is the elf which was executed */
+    if(ignotum_getbasemap(&map, 0, "*", 1) == 0){
+        printf("the first mapped file\\n");
+        printf("[%s] %lx-%lx\\n", map.pathname, map.start_addr, map.end_addr);
+        free(map.pathname);
+    }
+
+    return 0;
+}
+.EE
+.SH SEE ALSO
+.BR ignotum_getmaplist (1),
+.BR fnmatch(3)
