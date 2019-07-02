@@ -12,28 +12,33 @@ int ignotum_search_loop(ignotum_search_t *cs, off_t *out, off_t vaddr, const voi
     size_t i = 0;
     int ret;
 
-    if(cs->current+cs->i != (size_t)vaddr){
-        cs->i = 0;
+    if(cs->current != vaddr){
         cs->current = vaddr;
+        cs->start = 0;
+        cs->i = 0;
     }
 
     while(i < len && cs->i < cs->len){
         if(aux[i] == cs->search[cs->i]){
-            cs->i++;
-            i++;
+            cs->i++, i++;
         } else {
             if(cs->i){
                 cs->i = 0;
             } else {
                 i++;
             }
-
-            cs->current = vaddr+i;
         }
     }
 
+    if(cs->i && !cs->start){
+        cs->match = cs->current+i-cs->i;
+        cs->start = 1;
+    } else if(cs->i == 0){
+        cs->start = 0;
+    }
+
     if(cs->i == cs->len){
-        *out = cs->current;
+        *out = cs->match;
         cs->i = 0;
         ret = IGNOTUM_FOUND;
     } else if(cs->i){
@@ -41,6 +46,8 @@ int ignotum_search_loop(ignotum_search_t *cs, off_t *out, off_t vaddr, const voi
     } else {
         ret = IGNOTUM_NONE;
     }
+
+    cs->current += len;
 
     return ret;
 }

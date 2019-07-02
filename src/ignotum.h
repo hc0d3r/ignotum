@@ -36,9 +36,11 @@ typedef struct ignotum_mapinfo {
 
 typedef struct {
     off_t current;
+    off_t match;
     char *search;
     size_t len;
     size_t i;
+    int start;
 } ignotum_search_t;
 
 /* functions */
